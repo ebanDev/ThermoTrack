@@ -48,4 +48,8 @@ export default defineNuxtConfig({
     },
 
     ssr: false,
+
+    piniaPersistedstate: {
+        storage: 'localStorage',
+    },
 })
