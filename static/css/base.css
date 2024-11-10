@@ -1,0 +1,154 @@
+:root {
+    --cta-color: #0056b3;
+    --cta-hover-color: #0b3a6b;
+    --tabbar-active-color: #cad5e0;
+    --background-color: #f8f9fa;
+    --tabbar-color: #e9ecef;
+    --text-color: #333;
+    --border-color: #ccc;
+    --border-radius: 0.5rem;
+    --transition: 0.1s;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: var(--background-color);
+    color: var(--text-color);
+    line-height: 1.6;
+    font-weight: 500;
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    width: 80vw;
+}
+
+input, select {
+    background: var(--tabbar-color);
+    color: var(--text-color);
+    border: none;
+    border-radius: var(--border-radius);
+    padding: 0.75rem;
+    font-size: 1rem;
+    font-weight: 500;
+}
+
+button:not(.vc-pane-header-wrapper *, .vc-pane-layout *, .editor *) {
+    background: var(--cta-color);
+    color: white;
+    border: none;
+    border-radius: var(--border-radius);
+    padding: 0.6rem 0.75rem;
+    font-size: 1.1em;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color var(--transition);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.25rem;
+
+    span.iconify {
+        font-size: 1.2em;
+    }
+}
+
+dialog {
+    position: fixed;
+    bottom: 0;
+    padding: 2rem;
+    border: 0;
+    border-radius: 1.5rem 1.5rem 0 0;
+    background-color: var(--tabbar-color);
+    z-index: 1000;
+    width: 100vw;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    color: var(--text-color);
+
+    input, select {
+        background: var(--tabbar-active-color)
+    }
+
+    button, input, select {
+        width: 100%;
+    }
+
+    .form {
+        input {
+            margin-bottom: .5rem;
+        }
+
+        label {
+            display: flex;
+            gap: .25rem;
+            align-items: center;
+        }
+    }
+}
+
+.shadowClose {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 999;
+}
+
+.card {
+    padding: 1rem;
+    width: 90vw;
+    background: var(--tabbar-color);
+    border-radius: 0.5rem;
+    color: var(--text-color);
+    display: block;
+
+    &.active {
+        background-color: var(--cta-color);
+        color: white;
+    }
+
+    h1 {
+        font-size: 1.4rem;
+        display: flex;
+        align-items: center;
+
+        img {
+            width: 1.5rem;
+            height: 1.5rem;
+            margin-right: 0.5rem;
+            background: #fff;
+            border-radius: .3rem;
+        }
+    }
+
+    h2 {
+        font-size: 1.3rem;
+    }
+
+    h3 {
+        font-size: 1.2rem;
+    }
+
+    a {
+        color: var(--cta-color);
+        text-decoration: none;
+        font-weight: 700;
+    }
+}
+
+a:has(.card) {
+    text-decoration: none;
+}
