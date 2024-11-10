@@ -51,7 +51,7 @@ const estEndTime = computed(() => {
     const surplus = Math.abs(remaining);
     const hours = String(Math.floor(surplus / 3600) + 1).padStart(2, '0');
     const minutes = String(Math.floor((surplus % 3600) / 60)).padStart(2, '0');
-    return `Temps dépassé +${hours}:${minutes}`;
+    return `+${hours}:${minutes}`;
   }
 });
 
