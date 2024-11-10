@@ -18,6 +18,8 @@ export const useUserPrefsStore = defineStore('userPrefs', () => {
         analysisResults,
     };
 }, {
-        persist: true,
+    persist: {
+        storage: piniaPluginPersistedstate.localStorage(),
     },
+},
 );
