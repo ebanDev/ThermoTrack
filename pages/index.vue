@@ -41,11 +41,18 @@ const totalTime = computed(() => {
 const estEndTime = computed(() => {
   const totalSeconds = wearingGoal.value * 3600;
   const remaining = totalSeconds - getTotalTimeWornToday();
-  const now = new Date();
-  const end = new Date(now.getTime() + remaining * 1000);
-  const hours = String(end.getHours()).padStart(2, '0');
-  const minutes = String(end.getMinutes()).padStart(2, '0');
-  return `Fin à ${hours}:${minutes}`;
+
+  if (remaining > 0) {
+    const end = new Date(new Date().getTime() + remaining * 1000);
+    const hours = String(end.getHours()).padStart(2, '0');
+    const minutes = String(end.getMinutes()).padStart(2, '0');
+    return `Fin à ${hours}:${minutes}`;
+  } else {
+    const surplus = Math.abs(remaining);
+    const hours = String(Math.floor(surplus / 3600) + 1).padStart(2, '0');
+    const minutes = String(Math.floor((surplus % 3600) / 60)).padStart(2, '0');
+    return `Temps dépassé +${hours}:${minutes}`;
+  }
 });
 
 const progress = computed(() => {
