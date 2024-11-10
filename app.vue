@@ -1,6 +1,6 @@
 <template>
   <NuxtLayout>
-    <NuxtPage/>
+    <NuxtPage />
   </NuxtLayout>
 </template>
 
@@ -17,18 +17,20 @@
 </style>
 
 <script setup>
-let defferedPrompt;
+let deferredPrompt;
 
 const installPWA = () => {
-  defferedPrompt.prompt();
-  defferedPrompt.userChoice.then((choiceResult) => {
-    if (choiceResult.outcome === 'accepted') {
-      console.log('User accepted the A2HS prompt');
-    } else {
-      console.log('User dismissed the A2HS prompt');
-    }
-    defferedPrompt = null;
-  });
+  if (deferredPrompt) {
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.then((choiceResult) => {
+      if (choiceResult.outcome === 'accepted') {
+        console.log('User accepted the A2HS prompt');
+      } else {
+        console.log('User dismissed the A2HS prompt');
+      }
+      deferredPrompt = null;
+    });
+  }
 };
 
 onMounted(() => {
@@ -36,13 +38,16 @@ onMounted(() => {
     console.log('Launched: Installed');
   } else {
     console.log('Launched: Browser');
-    
-    window.addEventListener('beforeinstallprompt', (e) => {
-      e.preventDefault();
-      defferedPrompt = e;
-    });
 
-    installPWA();
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        
+        // Trigger the install prompt immediately
+        installPWA();
+      });
+    }
   }
 });
 </script>
