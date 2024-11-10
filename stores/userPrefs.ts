@@ -1,19 +1,7 @@
 export const useUserPrefsStore = defineStore('userPrefs', () => {
-    const wearingSessions = ref([{
-        start: new Date(),
-        end: new Date(),
-    }]);
+    const wearingSessions = ref([]);
 
-    const analysisResults = ref([{
-        date: new Date(),
-        volume: 0,
-        concentration: 0,
-        viscosity: "",
-        pH: 0,
-        roundCells: 0,
-        whiteBloodCells: 0,
-        device: "",
-    }]);
+    const analysisResults = ref([]);
 
     const wearingGoal = ref(15);
 

@@ -33,6 +33,11 @@ const installPWA = () => {
   }
 };
 
+const handleFirstClick = () => {
+  installPWA();
+  window.removeEventListener('click', handleFirstClick); // Remove listener after first click
+};
+
 onMounted(() => {
   if (window.matchMedia('(display-mode: standalone)').matches) {
     console.log('Launched: Installed');
@@ -43,11 +48,15 @@ onMounted(() => {
       window.addEventListener('beforeinstallprompt', (e) => {
         e.preventDefault();
         deferredPrompt = e;
-        
-        // Trigger the install prompt immediately
-        installPWA();
+
+        // Bind the install prompt to the first click
+        window.addEventListener('click', handleFirstClick);
       });
     }
   }
+});
+
+onBeforeUnmount(() => {
+  window.removeEventListener('click', handleFirstClick); // Clean up on unmount
 });
 </script>
