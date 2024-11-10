@@ -16,7 +16,7 @@
 }
 </style>
 
-<script>
+<script setup>
 let defferedPrompt;
 
 const installPWA = () => {
@@ -30,4 +30,19 @@ const installPWA = () => {
     defferedPrompt = null;
   });
 };
+
+onMounted(() => {
+  if (window.matchMedia('(display-mode: standalone)').matches) {
+    console.log('Launched: Installed');
+  } else {
+    console.log('Launched: Browser');
+    
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      defferedPrompt = e;
+    });
+
+    installPWA();
+  }
+});
 </script>
