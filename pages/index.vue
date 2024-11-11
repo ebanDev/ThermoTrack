@@ -134,6 +134,11 @@ const groupedSessions = computed(() => {
   wearingSessions.value.forEach(session => {
     const start = new Date(session.start);
     const end = session.end ? new Date(session.end) : null;
+
+    if (start.getHours() < 5) {
+        start.setDate(startOfDay.getDate() - 1);
+    }
+    
     const date = start.toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' });
 
     let group = grouped.find(g => g.date === date);
