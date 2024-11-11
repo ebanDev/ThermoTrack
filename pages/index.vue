@@ -13,6 +13,11 @@ const currentTime = ref(new Date());
 function getTotalTimeWornToday() {
   const startOfDay = new Date();
   startOfDay.setHours(5, 0, 0, 0);
+
+  if (new Date().getHours() < 5) {
+    startOfDay.setDate(startOfDay.getDate() - 1);
+  }
+
   let total = 0;
 
   wearingSessions.value.forEach(session => {
