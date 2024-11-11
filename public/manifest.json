@@ -1,11 +1,11 @@
 {
   "name": "ThermoTrack",
   "description": "ThermoTrack est une application développée pour aider les personnes pratiquant la contraception testiculaire thermique",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "display": "standalone",
   "start_url": "/",
   "scope": "/",
-  "background_color": "#f8f9fa",
+  "background_color": "#e9ecef",
   "theme_color": "#0056b3",
   "icons": [
     {
