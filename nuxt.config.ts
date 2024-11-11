@@ -23,11 +23,11 @@ export default defineNuxtConfig({
                 },
                 {
                     name: "description",
-                    content: "Mimi is a couple app",
+                    content: "ThermoTrack is a thermal contraception tracking PWA",
                 },
                 {
                     name: "theme-color",
-                    content: "#ba6296",
+                    content: "#e9ecef",
                 }
             ],
             link: [
