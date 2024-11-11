@@ -10,20 +10,34 @@ const isWearing = ref(false);
 const startTime = ref<Date | null>(null);
 const currentTime = ref(new Date());
 
-function getTotalTimeWornToday() {
-  const startOfDay = new Date();
+function getStartOfDay(date: Date = new Date()) {
+  const startOfDay = new Date(date);
   startOfDay.setHours(5, 0, 0, 0);
-
-  if (new Date().getHours() < 5) {
+  
+  if (date.getHours() < 5) {
     startOfDay.setDate(startOfDay.getDate() - 1);
   }
 
+  return startOfDay;
+}
+
+function getSessionDay(date: Date) {
+  const sessionDate = new Date(date);
+  if (sessionDate.getHours() < 5) {
+    sessionDate.setDate(sessionDate.getDate() - 1);
+  }
+  return sessionDate.toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' });
+}
+
+function getTotalTimeWornToday() {
+  const startOfDay = getStartOfDay();
   let total = 0;
 
   wearingSessions.value.forEach(session => {
-    if (new Date(session.start) >= startOfDay && session.end) {
+    const sessionStart = new Date(session.start);
+    if (sessionStart >= startOfDay && session.end) {
       const end = new Date(session.end);
-      total += (end.getTime() - new Date(session.start).getTime()) / 1000;
+      total += (end.getTime() - sessionStart.getTime()) / 1000;
     }
   });
 
@@ -93,7 +107,10 @@ function startSessionAt() {
 
   const now = new Date();
   const start = new Date(now.getFullYear(), now.getMonth(), now.getDate(), hours, minutes);
-  if (start > now) {
+  
+  // If the time is between midnight and 5 AM, or if the entered time is in the future,
+  // we need to adjust the date
+  if ((hours < 5) || (start > now)) {
     start.setDate(start.getDate() - 1);
   }
 
@@ -129,17 +146,18 @@ function stopSession() {
 let timer: NodeJS.Timer;
 
 const groupedSessions = computed(() => {
-  const grouped: { date: string; sessions: { start: Date, end: Date | null }[] }[] = [];
+  const grouped: { 
+    date: string; 
+    sessions: { start: Date; end: Date | null }[];
+    total?: number;
+  }[] = [];
 
   wearingSessions.value.forEach(session => {
     const start = new Date(session.start);
     const end = session.end ? new Date(session.end) : null;
-
-    if (start.getHours() < 5) {
-        start.setDate(start.getDate() - 1);
-    }
     
-    const date = start.toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' });
+    // Use the adjusted date based on 5 AM boundary
+    const date = getSessionDay(start);
 
     let group = grouped.find(g => g.date === date);
 
@@ -148,22 +166,46 @@ const groupedSessions = computed(() => {
       grouped.push(group);
     }
 
-
     group.sessions.push({ start, end });
   });
 
+  // Calculate totals for each group
   grouped.forEach(group => {
+    const startOfDay = getStartOfDay(new Date(group.sessions[0].start));
+    const endOfNextDay = new Date(startOfDay);
+    endOfNextDay.setDate(endOfNextDay.getDate() + 1);
+
     group.total = group.sessions.reduce((acc, session) => {
       if (session.end) {
-        const sessionDuration = (session.end.getTime() - session.start.getTime()) / 3600000;
+        // Only count time within the 5 AM to 5 AM period
+        const sessionStart = new Date(session.start);
+        const sessionEnd = new Date(session.end);
+        
+        // Clamp the session times to the current day's boundaries
+        const effectiveStart = new Date(Math.max(sessionStart.getTime(), startOfDay.getTime()));
+        const effectiveEnd = new Date(Math.min(sessionEnd.getTime(), endOfNextDay.getTime()));
+        
+        const sessionDuration = (effectiveEnd.getTime() - effectiveStart.getTime()) / 3600000;
         return acc + (sessionDuration / wearingGoal.value) * 100;
       } else {
-        return progress.value
+        // For ongoing sessions
+        const now = new Date();
+        const sessionStart = new Date(session.start);
+        const effectiveStart = new Date(Math.max(sessionStart.getTime(), startOfDay.getTime()));
+        const effectiveEnd = new Date(Math.min(now.getTime(), endOfNextDay.getTime()));
+        
+        const sessionDuration = (effectiveEnd.getTime() - effectiveStart.getTime()) / 3600000;
+        return acc + (sessionDuration / wearingGoal.value) * 100;
       }
     }, 0);
   });
 
-  return grouped;
+  // Sort groups by date, most recent first
+  return grouped.sort((a, b) => {
+    const dateA = new Date(a.sessions[0].start);
+    const dateB = new Date(b.sessions[0].start);
+    return dateB.getTime() - dateA.getTime();
+  });
 });
 
 onMounted(() => {
@@ -224,8 +266,12 @@ onMounted(() => {
                   ((session.end.getTime() - session.start.getTime()) / 3600000).toFixed(1) :
                   ((new Date().getTime() - session.start.getTime()) / 3600000).toFixed(1) }}h)
               </li>
+              <li>
+                <b>
+                  Total: {{ (wearingGoal * (group.total / 100)).toFixed(1) }}h
+                </b>
+              </li>
             </ul>
-
           </div>
           <progress-circle :progress="group.total" :size="50" :strokeWidth="8" />
         </div>
