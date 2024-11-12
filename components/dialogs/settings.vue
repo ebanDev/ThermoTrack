@@ -1,7 +1,7 @@
 <script setup lang="ts">
 const emit = defineEmits();
 const userPrefsStore = useUserPrefsStore();
-const { analysisResults, wearingGoal, wearingSessions } = storeToRefs(userPrefsStore);
+const { analysisResults, wearingGoal, dayStartAt, wearingSessions } = storeToRefs(userPrefsStore);
 
 function exportData() {
   const data = {
@@ -56,6 +56,8 @@ function resetData() {
     <div class="setting">
       <label for="wearingGoal">Objectif de port (en heures)</label>
       <input type="number" id="wearingGoal" v-model="wearingGoal" />
+      <label for="dayStartAt">Début de la journée</label>
+      <input type="time" id="dayStartAt" v-model="dayStartAt" />
     </div>
     <button @click="emit('close')">
       <Icon name="i-tabler-device-floppy" />

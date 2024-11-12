@@ -1,6 +1,6 @@
 <script setup lang="ts">
 const userPrefsStore = useUserPrefsStore();
-const { wearingSessions, wearingGoal } = storeToRefs(userPrefsStore);
+const { wearingSessions, wearingGoal, dayStartAt } = storeToRefs(userPrefsStore);
 
 definePageMeta({
   title: 'Accueil',
@@ -10,9 +10,14 @@ const isWearing = ref(false);
 const startTime = ref<Date | null>(null);
 const currentTime = ref(new Date());
 
+const setToStartOfDay = (date: Date) => {
+  const [hours, minutes] = dayStartAt.value.split(':').map(Number);
+  date.setHours(hours, minutes, 0, 0);
+};
+
 function getStartOfDay(date: Date = new Date()) {
   const startOfDay = new Date(date);
-  startOfDay.setHours(5, 0, 0, 0);
+  setToStartOfDay(startOfDay);
   
   if (date.getHours() < 5) {
     startOfDay.setDate(startOfDay.getDate() - 1);
@@ -190,7 +195,8 @@ const groupedSessions = computed(() => {
       // Check if session crosses 5 AM boundary
       const nextDay5AM = new Date(start);
       nextDay5AM.setDate(nextDay5AM.getDate() + 1);
-      nextDay5AM.setHours(5, 0, 0, 1);
+      setToStartOfDay(nextDay5AM);
+      nextDay5AM.setSeconds(nextDay5AM.getSeconds() + 1);
 
       if (start.getTime() < nextDay5AM.getTime() && end.getTime() > nextDay5AM.getTime()) {
         // Split the session
