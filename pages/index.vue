@@ -332,7 +332,7 @@ onMounted(() => {
               {{ group.date }}
             </h3>
             <ul>
-              <li v-for="session in [...group.sessions].sort((a, b) => b.start.getTime() - a.start.getTime())"
+                <li v-for="session in [...group.sessions].sort((a, b) => a.start.getTime() - b.start.getTime())"
                 :key="session.start">
                 {{ new Date(session.start).toLocaleTimeString('fr-FR', {
                   hour: '2-digit', minute: '2-digit', hour12:
