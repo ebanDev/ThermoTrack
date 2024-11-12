@@ -143,6 +143,36 @@ function stopSession() {
   startTime.value = null;
 }
 
+function stopSessionAt() {
+  const time = prompt('Entrez l\'heure de fin (HH:MM)');
+  if (!time) return;
+
+  const [hours, minutes] = time.split(':').map(Number);
+  if (isNaN(hours) || isNaN(minutes) || hours < 0 || hours > 23 || minutes < 0 || minutes > 59) {
+    alert('Heure invalide');
+    return;
+  }
+
+  const now = new Date();
+  const end = new Date(now.getFullYear(), now.getMonth(), now.getDate(), hours, minutes);
+  
+  // If the time is between midnight and 5 AM, or if the entered time is in the future,
+  // we need to adjust the date
+  if ((hours < 5) || (end > now)) {
+    end.setDate(end.getDate() - 1);
+  }
+
+  isWearing.value = false;
+  clearInterval(timer);
+
+  const unfinishedSession = wearingSessions.value.find(session => !session.end);
+  if (unfinishedSession) {
+    unfinishedSession.end = end;
+  }
+
+  startTime.value = null;
+}
+
 let timer: NodeJS.Timer;
 
 const groupedSessions = computed(() => {
@@ -156,43 +186,83 @@ const groupedSessions = computed(() => {
     const start = new Date(session.start);
     const end = session.end ? new Date(session.end) : null;
     
-    // Use the adjusted date based on 5 AM boundary
-    const date = getSessionDay(start);
+    if (end) {
+      // Check if session crosses 5 AM boundary
+      const nextDay5AM = new Date(start);
+      nextDay5AM.setDate(nextDay5AM.getDate() + 1);
+      nextDay5AM.setHours(5, 0, 0, 1);
 
-    let group = grouped.find(g => g.date === date);
+      if (start.getTime() < nextDay5AM.getTime() && end.getTime() > nextDay5AM.getTime()) {
+        // Split the session
+        const firstPart = { 
+          start: start, 
+          end: nextDay5AM 
+        };
+        const secondPart = { 
+          start: nextDay5AM, 
+          end: end 
+        };
 
-    if (!group) {
-      group = { date, sessions: [] };
-      grouped.push(group);
+        // Add first part to first day
+        const firstDate = getSessionDay(start);
+        let firstGroup = grouped.find(g => g.date === firstDate);
+        if (!firstGroup) {
+          firstGroup = { date: firstDate, sessions: [] };
+          grouped.push(firstGroup);
+        }
+        firstGroup.sessions.push(firstPart);
+
+        // Add second part to next day
+        const secondDate = getSessionDay(nextDay5AM);
+        let secondGroup = grouped.find(g => g.date === secondDate);
+        if (!secondGroup) {
+          secondGroup = { date: secondDate, sessions: [] };
+          grouped.push(secondGroup);
+        }
+        secondGroup.sessions.push(secondPart);
+      } else {
+        // Regular session (no split needed)
+        const date = getSessionDay(start);
+        let group = grouped.find(g => g.date === date);
+        if (!group) {
+          group = { date, sessions: [] };
+          grouped.push(group);
+        }
+        group.sessions.push({ start, end });
+      }
+    } else {
+      // Ongoing session
+      const date = getSessionDay(start);
+      let group = grouped.find(g => g.date === date);
+      if (!group) {
+        group = { date, sessions: [] };
+        grouped.push(group);
+      }
+      group.sessions.push({ start, end });
     }
-
-    group.sessions.push({ start, end });
   });
 
   // Calculate totals for each group
   grouped.forEach(group => {
     const startOfDay = getStartOfDay(new Date(group.sessions[0].start));
-    const endOfNextDay = new Date(startOfDay);
-    endOfNextDay.setDate(endOfNextDay.getDate() + 1);
+    const endOfDay = new Date(startOfDay);
+    endOfDay.setHours(29, 0, 0, 0); // 5 AM next day
 
     group.total = group.sessions.reduce((acc, session) => {
       if (session.end) {
-        // Only count time within the 5 AM to 5 AM period
         const sessionStart = new Date(session.start);
         const sessionEnd = new Date(session.end);
         
-        // Clamp the session times to the current day's boundaries
         const effectiveStart = new Date(Math.max(sessionStart.getTime(), startOfDay.getTime()));
-        const effectiveEnd = new Date(Math.min(sessionEnd.getTime(), endOfNextDay.getTime()));
+        const effectiveEnd = new Date(Math.min(sessionEnd.getTime(), endOfDay.getTime()));
         
         const sessionDuration = (effectiveEnd.getTime() - effectiveStart.getTime()) / 3600000;
         return acc + (sessionDuration / wearingGoal.value) * 100;
       } else {
-        // For ongoing sessions
         const now = new Date();
         const sessionStart = new Date(session.start);
         const effectiveStart = new Date(Math.max(sessionStart.getTime(), startOfDay.getTime()));
-        const effectiveEnd = new Date(Math.min(now.getTime(), endOfNextDay.getTime()));
+        const effectiveEnd = new Date(Math.min(now.getTime(), endOfDay.getTime()));
         
         const sessionDuration = (effectiveEnd.getTime() - effectiveStart.getTime()) / 3600000;
         return acc + (sessionDuration / wearingGoal.value) * 100;
@@ -200,7 +270,6 @@ const groupedSessions = computed(() => {
     }, 0);
   });
 
-  // Sort groups by date, most recent first
   return grouped.sort((a, b) => {
     const dateA = new Date(a.sessions[0].start);
     const dateB = new Date(b.sessions[0].start);
@@ -232,13 +301,17 @@ onMounted(() => {
         <Icon name="i-tabler-play" />
         Démarrer
       </button>
+      <button @click="stopSession" v-else>
+        <Icon name="i-tabler-player-pause" />
+        Arrêter
+      </button>
       <button @click="startSessionAt" v-if="!isWearing">
         <Icon name="i-tabler-rotate-clockwise" />
         Démarrer à...
       </button>
-      <button @click="stopSession" v-else>
-        <Icon name="i-tabler-player-pause" />
-        Arrêter
+      <button @click="stopSessionAt" v-else>
+        <Icon name="i-tabler-rotate-anticlockwise" />
+        Arrêter à...
       </button>
     </div>
 
