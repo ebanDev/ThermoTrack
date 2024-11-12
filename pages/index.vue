@@ -245,6 +245,7 @@ const groupedSessions = computed(() => {
         group = { date, sessions: [] };
         grouped.push(group);
       }
+      
       group.sessions.push({ start, end });
     }
   });
@@ -277,11 +278,7 @@ const groupedSessions = computed(() => {
     }, 0);
   });
 
-  return grouped.sort((a, b) => {
-    const dateA = new Date(a.sessions[0].start);
-    const dateB = new Date(b.sessions[0].start);
-    return dateB.getTime() - dateA.getTime();
-  });
+  return grouped.sort((a, b) => new Date(a.sessions[0].start).getTime() - new Date(b.sessions[0].start).getTime());
 });
 
 onMounted(() => {
