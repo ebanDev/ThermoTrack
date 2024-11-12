@@ -35,21 +35,22 @@ function getSessionDay(date: Date) {
 }
 
 function getTotalTimeWornToday() {
-  const startOfDay = getStartOfDay();
   let total = 0;
 
-  wearingSessions.value.forEach(session => {
-    const sessionStart = new Date(session.start);
-    if (sessionStart >= startOfDay && session.end) {
-      const end = new Date(session.end);
-      total += (end.getTime() - sessionStart.getTime()) / 1000;
+  groupedSessions.value.forEach(group => {
+    if (group.date === getSessionDay(new Date())) {
+      group.sessions.forEach(session => {
+        const sessionStart = new Date(session.start);
+        if (session.end) {
+          const end = new Date(session.end);
+          total += (end.getTime() - sessionStart.getTime()) / 1000;
+        } else if (isWearing.value && startTime.value) {
+          const currentSessionDuration = (currentTime.value.getTime() - startTime.value.getTime()) / 1000;
+          total += currentSessionDuration;
+        }
+      });
     }
   });
-
-  if (isWearing.value && startTime.value) {
-    const currentSessionDuration = (currentTime.value.getTime() - startTime.value.getTime()) / 1000;
-    total += currentSessionDuration;
-  }
 
   return total;
 }
