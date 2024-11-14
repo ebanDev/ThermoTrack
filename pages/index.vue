@@ -9,6 +9,8 @@ definePageMeta({
 const isWearing = ref(false);
 const startTime = ref<Date | null>(null);
 const currentTime = ref(new Date());
+const currentSessionGroup = ref({ date: '', sessions: [] });
+const showSessionDialog = ref(false);
 
 const setToStartOfDay = (date: Date) => {
   const [hours, minutes] = dayStartAt.value.split(':').map(Number);
@@ -259,7 +261,11 @@ const groupedSessions = computed(() => {
     group.total = group.sessions.reduce((acc, session) => {
       if (session.end) {
         const sessionStart = new Date(session.start);
-        const sessionEnd = new Date(session.end);
+        let sessionEnd = new Date(session.end);
+        
+        if (sessionEnd < sessionStart) {
+          sessionEnd = new Date(sessionEnd.getTime() + 24 * 60 * 60 * 1000);
+        }
         
         const effectiveStart = new Date(Math.max(sessionStart.getTime(), startOfDay.getTime()));
         const effectiveEnd = new Date(Math.min(sessionEnd.getTime(), endOfDay.getTime()));
@@ -318,7 +324,7 @@ onMounted(() => {
         Démarrer à...
       </button>
       <button @click="stopSessionAt" v-else>
-        <Icon name="i-tabler-rotate-anticlockwise" />
+        <Icon name="i-tabler-rotate" />
         Arrêter à...
       </button>
     </div>
@@ -333,7 +339,7 @@ onMounted(() => {
             </h3>
             <ul>
                 <li v-for="session in [...group.sessions].sort((a, b) => a.start.getTime() - b.start.getTime())"
-                :key="session.start">
+                :key="session.start" @click="currentSessionGroup = group; showSessionDialog = true">
                 {{ new Date(session.start).toLocaleTimeString('fr-FR', {
                   hour: '2-digit', minute: '2-digit', hour12:
                     false
@@ -344,7 +350,7 @@ onMounted(() => {
                   hour12: false
                 }) : 'En cours' }}
                 ({{ session.end ?
-                  ((session.end.getTime() - session.start.getTime()) / 3600000).toFixed(1) :
+                  (((session.end.getTime() < session.start.getTime() ? session.end.getTime() + 86400000 : session.end.getTime()) - session.start.getTime()) / 3600000).toFixed(1) :
                   ((new Date().getTime() - session.start.getTime()) / 3600000).toFixed(1) }}h)
               </li>
               <li>
@@ -358,6 +364,7 @@ onMounted(() => {
         </div>
       </div>
     </div>
+    <dialogs-edit-sessions v-if="showSessionDialog" :sessionGroup="currentSessionGroup" @close="showSessionDialog = false" />
   </main>
 </template>
 
