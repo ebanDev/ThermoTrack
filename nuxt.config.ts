@@ -7,6 +7,7 @@ export default defineNuxtConfig({
         "@nuxtjs/google-fonts",
         "@pinia/nuxt",
         "@pinia-plugin-persistedstate/nuxt",
+        "nuxt-swiper"
     ],
     css: ["~/static/css/base.css"],
 

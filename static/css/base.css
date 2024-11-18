@@ -23,6 +23,7 @@ body {
     color: var(--text-color);
     line-height: 1.6;
     font-weight: 500;
+    overflow-x: hidden;
 }
 
 form {

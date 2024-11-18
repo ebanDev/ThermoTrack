@@ -76,7 +76,7 @@ const estEndTime = computed(() => {
     return `Fin à ${hours}:${minutes}`;
   } else {
     const surplus = Math.abs(remaining);
-    const hours = String(Math.floor(surplus / 3600) + 1).padStart(2, '0');
+    const hours = String(Math.floor(surplus / 3600)).padStart(2, '0');
     const minutes = String(Math.floor((surplus % 3600) / 60)).padStart(2, '0');
     return `+${hours}:${minutes}`;
   }

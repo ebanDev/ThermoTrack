@@ -15,9 +15,13 @@
     "@nuxtjs/google-fonts": "^3.2.0",
     "@pinia-plugin-persistedstate/nuxt": "^1.2.1",
     "@pinia/nuxt": "^0.5.5",
+    "add": "^2.0.6",
+    "chart.js": "^4.4.6",
     "nuxt": "^3.14.159",
+    "nuxt-swiper": "^2.0.0",
     "pinia": "^2.2.6",
-    "vue": "latest"
+    "vue": "latest",
+    "vue-chartjs": "^5.3.2"
   },
   "devDependencies": {
     "sass": "^1.80.6"
