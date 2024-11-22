@@ -403,14 +403,11 @@ onMounted(() => {
   }
 }
 
-.sessions {
-  margin-top: 2rem;
-}
-
 .sessions-list {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: .75rem;
+  margin-top: .75rem;
 }
 
 .sessionCard {
