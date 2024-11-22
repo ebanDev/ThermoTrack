@@ -88,11 +88,12 @@ const tips = computed(() => availableTips.filter(tip => tip.condition).map(tip =
         <div class="card">
             <Line :data="chartData" :options="chartOptions" />
         </div>
-        <swiper-container ref="swiperRef" :init="false" class="swiper">
+        <swiper-container ref="swiperRef" :init="false" class="swiper" v-if="tips.length > 1">
             <swiper-slide v-for="tip in tips" :key="tip">
                 <p class="card active">💡 {{ tip }}</p>
             </swiper-slide>
         </swiper-container>
+        <p class="card active" v-if="tips.length === 1">💡 {{ tips[0] }}</p>
         <div class="card" v-for="result in sortedResults" :key="result.id"
             @click="showEditAnalysisDialog = true; currentAnalysis = result">
             <h2>{{ dateToLocaleString(result.date) }}</h2>
