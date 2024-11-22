@@ -356,7 +356,7 @@ onMounted(() => {
         🎉 Vous avez porté votre contraception tous les jours pendant la durée recommandée sur les trois deniers mois.
       </p>
       <p v-else>
-        ⚠️ Vous avez manqué l'équivalent de {{ Math.round((100 - wearingScore) * .9) }} jours de port de contraception sur les trois derniers mois.
+        ⚠️ Vous avez manqué l'équivalent de {{ Math.round((100 - wearingScore) * .9 * 10) / 10 }} jours de port de contraception sur les trois derniers mois.
       </p>
     </div>
 
