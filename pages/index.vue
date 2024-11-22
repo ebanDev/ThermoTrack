@@ -293,18 +293,21 @@ const groupedSessions = computed(() => {
 
 const wearingScore = computed(() => {
   const today = getSessionDay(new Date());
-  const filteredSessions = groupedSessions.value.filter(group => group.date !== today);
-  
+  const filteredSessions = groupedSessions.value
+    .filter(group => group.date !== today);
+
   if (filteredSessions.length === 0) return 100;
 
+  const now = new Date();
+  now.setHours(0, 0, 0, 0);
   const startOfFirstSession = new Date(filteredSessions[filteredSessions.length - 1]?.sessions[0]?.start);
-  const totalDays = Math.ceil((new Date().getTime() - startOfFirstSession.getTime()) / (1000 * 60 * 60 * 24));
+  const totalDays = Math.max(1, Math.ceil((now.getTime() - startOfFirstSession.getTime()) / (1000 * 60 * 60 * 24)) - 1);
   const fullScore = totalDays * 100;
   const totalScore = filteredSessions.reduce((acc, group) => {
     return acc + Math.min(group.total, 100);
   }, 0);
 
-  return (totalScore / fullScore) * 100;
+  return Math.min((totalScore / fullScore) * 100, 100);
 });
 
 onMounted(() => {
