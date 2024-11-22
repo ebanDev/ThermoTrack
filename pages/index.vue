@@ -292,11 +292,15 @@ const groupedSessions = computed(() => {
 });
 
 const wearingScore = computed(() => {
-  const today = new Date();
-  const startOfFirstSession = new Date(groupedSessions.value[groupedSessions.value.length - 1]?.sessions[0]?.start || today);
-  const totalDays = Math.ceil((today.getTime() - startOfFirstSession.getTime()) / (1000 * 60 * 60 * 24));
+  const today = getSessionDay(new Date());
+  const filteredSessions = groupedSessions.value.filter(group => group.date !== today);
+  
+  if (filteredSessions.length === 0) return 100;
+
+  const startOfFirstSession = new Date(filteredSessions[filteredSessions.length - 1]?.sessions[0]?.start);
+  const totalDays = Math.ceil((new Date().getTime() - startOfFirstSession.getTime()) / (1000 * 60 * 60 * 24));
   const fullScore = totalDays * 100;
-  const totalScore = groupedSessions.value.reduce((acc, group) => {
+  const totalScore = filteredSessions.reduce((acc, group) => {
     return acc + Math.min(group.total, 100);
   }, 0);
 
