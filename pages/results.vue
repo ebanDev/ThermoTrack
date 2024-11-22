@@ -27,14 +27,14 @@ const chartData = reactive({
         {
             label: 'Concentration',
             data: concentrations,
-            borderColor: 'rgba(255, 99, 132, 1)',
-            backgroundColor: 'rgba(255, 99, 132, 0.2)',
+            borderColor: 'rgba(11, 58, 107, 1)',
+            backgroundColor: 'rgba(11, 58, 107, 0.2)',
         },
         {
             label: 'Cellules rondes',
             data: roundCells,
-            borderColor: 'rgba(54, 162, 235, 1)',
-            backgroundColor: 'rgba(54, 162, 235, 0.2)',
+            borderColor: 'rgba(0, 86, 179, 1)',
+            backgroundColor: 'rgba(0, 86, 179, 0.2)',
         },
     ],
 });
