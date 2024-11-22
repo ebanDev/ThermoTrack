@@ -294,7 +294,7 @@ const groupedSessions = computed(() => {
 const wearingScore = computed(() => {
   const today = new Date();
   const startOfFirstSession = new Date(groupedSessions.value[groupedSessions.value.length - 1]?.sessions[0]?.start || today);
-  const totalDays = Math.ceil((today.getTime() - startOfFirstSession.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+  const totalDays = Math.ceil((today.getTime() - startOfFirstSession.getTime()) / (1000 * 60 * 60 * 24));
   const fullScore = totalDays * 100;
   const totalScore = groupedSessions.value.reduce((acc, group) => {
     return acc + Math.min(group.total, 100);
