@@ -291,6 +291,18 @@ const groupedSessions = computed(() => {
   });
 });
 
+const wearingScore = computed(() => {
+  const today = new Date();
+  const startOfFirstSession = new Date(groupedSessions.value[groupedSessions.value.length - 1]?.sessions[0]?.start || today);
+  const totalDays = Math.ceil((today.getTime() - startOfFirstSession.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+  const fullScore = totalDays * 100;
+  const totalScore = groupedSessions.value.reduce((acc, group) => {
+    return acc + Math.min(group.total, 100);
+  }, 0);
+
+  return (totalScore / fullScore) * 100;
+});
+
 onMounted(() => {
   const unfinishedSession = wearingSessions.value.find(session => !session.end);
   if (unfinishedSession) {
@@ -329,6 +341,18 @@ onMounted(() => {
       </button>
     </div>
 
+    <div class="card active">
+      <h3>
+        Score de contraception : {{ wearingScore.toFixed(1) }}%
+      </h3>
+      <p v-if="wearingScore === 100">
+        🎉 Vous avez porté votre contraception tous les jours pendant la durée recommandée sur les trois deniers mois.
+      </p>
+      <p v-else>
+        ⚠️ Vous avez manqué l'équivalent de {{ (100 - wearingGoal) * 0.9 }} jours de port de contraception sur les trois derniers mois.
+      </p>
+    </div>
+
     <div class="sessions">
       <h2 class="sessions-title">Historique</h2>
       <div class="sessions-list">
@@ -338,21 +362,21 @@ onMounted(() => {
               {{ group.date }}
             </h3>
             <ul>
-                <li v-for="session in [...group.sessions].sort((a, b) => a.start.getTime() - b.start.getTime())"
+              <li v-for="session in [...group.sessions].sort((a, b) => a.start.getTime() - b.start.getTime())"
                 :key="session.start" @click="currentSessionGroup = group; showSessionDialog = true">
                 {{ new Date(session.start).toLocaleTimeString('fr-FR', {
-                  hour: '2-digit', minute: '2-digit', hour12:
-                    false
+                hour: '2-digit', minute: '2-digit', hour12:
+                false
                 })
                 }} -
                 {{ session.end ? new Date(session.end).toLocaleTimeString('fr-FR', {
-                  hour: '2-digit', minute: '2-digit',
-                  hour12: false
+                hour: '2-digit', minute: '2-digit',
+                hour12: false
                 }) : 'En cours' }}
                 ({{ session.end ?
-                  (((session.end.getTime() < session.start.getTime() ? session.end.getTime() + 86400000 : session.end.getTime()) - session.start.getTime()) / 3600000).toFixed(1) :
-                  ((new Date().getTime() - session.start.getTime()) / 3600000).toFixed(1) }}h)
-              </li>
+                (((session.end.getTime() < session.start.getTime() ? session.end.getTime() + 86400000 :
+                  session.end.getTime()) - session.start.getTime()) / 3600000).toFixed(1) : ((new Date().getTime() -
+                  session.start.getTime()) / 3600000).toFixed(1) }}h) </li>
               <li>
                 <b>
                   Total: {{ (wearingGoal * (group.total / 100)).toFixed(1) }}h
@@ -364,7 +388,8 @@ onMounted(() => {
         </div>
       </div>
     </div>
-    <dialogs-edit-sessions v-if="showSessionDialog" :sessionGroup="currentSessionGroup" @close="showSessionDialog = false" />
+    <dialogs-edit-sessions v-if="showSessionDialog" :sessionGroup="currentSessionGroup"
+      @close="showSessionDialog = false" />
   </main>
 </template>
 

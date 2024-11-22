@@ -117,7 +117,7 @@ dialog {
     display: block;
 
     &.active {
-        background-color: var(--cta-color);
+        background-color: var(--cta-hover-color);
         color: white;
     }
 

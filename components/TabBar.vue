@@ -8,19 +8,19 @@ const currentRoute = useRoute()
       <nuxt-link to="/">
         <Icon name="i-tabler-home"/>
       </nuxt-link>
-      <span>Home</span>
+      <span>Accueil</span>
     </div>
     <div class="item" :class="{ active: currentRoute.path === '/results' }">
       <nuxt-link to="/results">
         <Icon name="i-tabler-chart-bar"/>
       </nuxt-link>
-      <span>Results</span>
+      <span>Analyses</span>
     </div>
     <div class="item" :class="{ active: currentRoute.path === '/info' }">
       <nuxt-link to="/info">
         <Icon name="i-tabler-info-circle"/>
       </nuxt-link>
-      <span>Info</span>
+      <span>Infos</span>
     </div>
   </nav>
 </template>
