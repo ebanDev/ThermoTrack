@@ -203,8 +203,6 @@ const groupedSessions = computed(() => {
       setToStartOfDay(nextDay5AM);
       nextDay5AM.setSeconds(nextDay5AM.getSeconds() + 1);
 
-      console.log(session, start, end, nextDay5AM);
-
       if (start.getTime() < nextDay5AM.getTime() && end.getTime() > nextDay5AM.getTime()) {
         // Split the session
         const firstPart = {
@@ -256,8 +254,6 @@ const groupedSessions = computed(() => {
     }
   });
 
-  console.log(wearingSessions.value);
-
   // Calculate totals for each group
   grouped.forEach(group => {
     const startOfDay = getStartOfDay(new Date(group.sessions[0].start));
@@ -297,8 +293,6 @@ const groupedSessions = computed(() => {
   });
 });
 
-console.log(groupedSessions.value);
-
 const wearingScore = computed(() => {
   const today = getSessionDay(new Date());
   const filteredSessions = groupedSessions.value
@@ -315,7 +309,7 @@ const wearingScore = computed(() => {
     return acc + Math.min(group.total, 100);
   }, 0);
 
-  return Math.min((totalScore / fullScore) * 100, 100);
+  return Math.min(((totalScore - 100) / fullScore) * 100, 100);
 });
 
 onMounted(() => {
