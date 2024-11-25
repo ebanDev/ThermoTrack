@@ -20,7 +20,7 @@ const setToStartOfDay = (date: Date) => {
 function getStartOfDay(date: Date = new Date()) {
   const startOfDay = new Date(date);
   setToStartOfDay(startOfDay);
-  
+
   if (date.getHours() < 5) {
     startOfDay.setDate(startOfDay.getDate() - 1);
   }
@@ -115,7 +115,7 @@ function startSessionAt() {
 
   const now = new Date();
   const start = new Date(now.getFullYear(), now.getMonth(), now.getDate(), hours, minutes);
-  
+
   // If the time is between midnight and 5 AM, or if the entered time is in the future,
   // we need to adjust the date
   if ((hours < 5) || (start > now)) {
@@ -163,7 +163,7 @@ function stopSessionAt() {
 
   const now = new Date();
   const end = new Date(now.getFullYear(), now.getMonth(), now.getDate(), hours, minutes);
-  
+
   // If the time is between midnight and 5 AM, or if the entered time is in the future,
   // we need to adjust the date
   if ((hours < 5) || (end > now)) {
@@ -184,8 +184,8 @@ function stopSessionAt() {
 let timer: NodeJS.Timer;
 
 const groupedSessions = computed(() => {
-  const grouped: { 
-    date: string; 
+  const grouped: {
+    date: string;
     sessions: { start: Date; end: Date | null }[];
     total?: number;
   }[] = [];
@@ -193,23 +193,21 @@ const groupedSessions = computed(() => {
   wearingSessions.value.forEach(session => {
     const start = new Date(session.start);
     const end = session.end ? new Date(session.end) : null;
-    
+
     if (end) {
       // Check if session crosses 5 AM boundary
-      const nextDay5AM = new Date(start);
-      nextDay5AM.setDate(nextDay5AM.getDate() + 1);
-      setToStartOfDay(nextDay5AM);
-      nextDay5AM.setSeconds(nextDay5AM.getSeconds() + 1);
+      const endOfNextDay = new Date(start);
+      setToStartOfDay(endOfNextDay);
 
-      if (start.getTime() < nextDay5AM.getTime() && end.getTime() > nextDay5AM.getTime()) {
+      if (start.getTime() < endOfNextDay.getTime() && end.getTime() > endOfNextDay.getTime()) {
         // Split the session
-        const firstPart = { 
-          start: start, 
-          end: nextDay5AM 
+        const firstPart = {
+          start: start,
+          end: endOfNextDay
         };
-        const secondPart = { 
-          start: nextDay5AM, 
-          end: end 
+        const secondPart = {
+          start: endOfNextDay,
+          end: end
         };
 
         // Add first part to first day
@@ -222,7 +220,7 @@ const groupedSessions = computed(() => {
         firstGroup.sessions.push(firstPart);
 
         // Add second part to next day
-        const secondDate = getSessionDay(nextDay5AM);
+        const secondDate = getSessionDay(endOfNextDay);
         let secondGroup = grouped.find(g => g.date === secondDate);
         if (!secondGroup) {
           secondGroup = { date: secondDate, sessions: [] };
@@ -247,7 +245,7 @@ const groupedSessions = computed(() => {
         group = { date, sessions: [] };
         grouped.push(group);
       }
-      
+
       group.sessions.push({ start, end });
     }
   });
@@ -262,14 +260,14 @@ const groupedSessions = computed(() => {
       if (session.end) {
         const sessionStart = new Date(session.start);
         let sessionEnd = new Date(session.end);
-        
+
         if (sessionEnd < sessionStart) {
           sessionEnd = new Date(sessionEnd.getTime() + 24 * 60 * 60 * 1000);
         }
-        
+
         const effectiveStart = new Date(Math.max(sessionStart.getTime(), startOfDay.getTime()));
         const effectiveEnd = new Date(Math.min(sessionEnd.getTime(), endOfDay.getTime()));
-        
+
         const sessionDuration = (effectiveEnd.getTime() - effectiveStart.getTime()) / 3600000;
         return acc + (sessionDuration / wearingGoal.value) * 100;
       } else {
@@ -277,7 +275,7 @@ const groupedSessions = computed(() => {
         const sessionStart = new Date(session.start);
         const effectiveStart = new Date(Math.max(sessionStart.getTime(), startOfDay.getTime()));
         const effectiveEnd = new Date(Math.min(now.getTime(), endOfDay.getTime()));
-        
+
         const sessionDuration = (effectiveEnd.getTime() - effectiveStart.getTime()) / 3600000;
         return acc + (sessionDuration / wearingGoal.value) * 100;
       }
@@ -356,7 +354,8 @@ onMounted(() => {
         🎉 Vous avez porté votre contraception tous les jours pendant la durée recommandée sur les trois deniers mois.
       </p>
       <p v-else>
-        ⚠️ Vous avez manqué l'équivalent de {{ Math.round((100 - wearingScore) * .9 * 10) / 10 }} jours de port de contraception sur les trois derniers mois.
+        ⚠️ Vous avez manqué l'équivalent de {{ Math.round((100 - wearingScore) * .9 * 10) / 10 }} jours de port de
+        contraception sur les trois derniers mois.
       </p>
     </div>
 
@@ -372,18 +371,18 @@ onMounted(() => {
               <li v-for="session in [...group.sessions].sort((a, b) => a.start.getTime() - b.start.getTime())"
                 :key="session.start" @click="currentSessionGroup = group; showSessionDialog = true">
                 {{ new Date(session.start).toLocaleTimeString('fr-FR', {
-                hour: '2-digit', minute: '2-digit', hour12:
-                false
+                  hour: '2-digit', minute: '2-digit', hour12:
+                    false
                 })
                 }} -
                 {{ session.end ? new Date(session.end).toLocaleTimeString('fr-FR', {
-                hour: '2-digit', minute: '2-digit',
-                hour12: false
+                  hour: '2-digit', minute: '2-digit',
+                  hour12: false
                 }) : 'En cours' }}
                 ({{ session.end ?
-                (((session.end.getTime() < session.start.getTime() ? session.end.getTime() + 86400000 :
-                  session.end.getTime()) - session.start.getTime()) / 3600000).toFixed(1) : ((new Date().getTime() -
-                  session.start.getTime()) / 3600000).toFixed(1) }}h) </li>
+                  (((session.end.getTime() < session.start.getTime() ? session.end.getTime() + 86400000 :
+                    session.end.getTime()) - session.start.getTime()) / 3600000).toFixed(1) : ((new Date().getTime() -
+                      session.start.getTime()) / 3600000).toFixed(1) }}h) </li>
               <li>
                 <b>
                   Total: {{ (wearingGoal * (group.total / 100)).toFixed(1) }}h
