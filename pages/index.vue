@@ -196,21 +196,27 @@ const groupedSessions = computed(() => {
 
     if (end) {
       // Check if session crosses 5 AM boundary
-      const endOfNextDay = new Date(start);
-      setToStartOfDay(endOfNextDay);
+      const nextDay5AM = new Date(start);
+      if (start.getHours() >= 5) {
+        nextDay5AM.setDate(nextDay5AM.getDate() + 1);
+      }
+      setToStartOfDay(nextDay5AM);
+      nextDay5AM.setSeconds(nextDay5AM.getSeconds() + 1);
 
-      if (start.getTime() < endOfNextDay.getTime() && end.getTime() > endOfNextDay.getTime()) {
+      console.log(session, start, end, nextDay5AM);
+
+      if (start.getTime() < nextDay5AM.getTime() && end.getTime() > nextDay5AM.getTime()) {
         // Split the session
         const firstPart = {
           start: start,
-          end: endOfNextDay
+          end: nextDay5AM,
         };
         const secondPart = {
-          start: endOfNextDay,
-          end: end
+          start: nextDay5AM,
+          end: end,
         };
 
-        // Add first part to first day
+        // Add first part to the first day's group
         const firstDate = getSessionDay(start);
         let firstGroup = grouped.find(g => g.date === firstDate);
         if (!firstGroup) {
@@ -219,8 +225,8 @@ const groupedSessions = computed(() => {
         }
         firstGroup.sessions.push(firstPart);
 
-        // Add second part to next day
-        const secondDate = getSessionDay(endOfNextDay);
+        // Add second part to the second day's group
+        const secondDate = getSessionDay(nextDay5AM);
         let secondGroup = grouped.find(g => g.date === secondDate);
         if (!secondGroup) {
           secondGroup = { date: secondDate, sessions: [] };
@@ -228,7 +234,7 @@ const groupedSessions = computed(() => {
         }
         secondGroup.sessions.push(secondPart);
       } else {
-        // Regular session (no split needed)
+        // Add as a regular session (no split needed)
         const date = getSessionDay(start);
         let group = grouped.find(g => g.date === date);
         if (!group) {
@@ -249,6 +255,8 @@ const groupedSessions = computed(() => {
       group.sessions.push({ start, end });
     }
   });
+
+  console.log(wearingSessions.value);
 
   // Calculate totals for each group
   grouped.forEach(group => {
@@ -288,6 +296,8 @@ const groupedSessions = computed(() => {
     return dateB.getTime() - dateA.getTime();
   });
 });
+
+console.log(groupedSessions.value);
 
 const wearingScore = computed(() => {
   const today = getSessionDay(new Date());
