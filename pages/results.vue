@@ -94,7 +94,7 @@ const tips = computed(() => availableTips.filter(tip => tip.condition).map(tip =
             </swiper-slide>
         </swiper-container>
         <p class="card active" v-if="tips.length === 1">💡 {{ tips[0] }}</p>
-        <div class="card" v-for="result in sortedResults" :key="result.id"
+        <div class="card" v-for="result in sortedResults" :key="result.id" v-if="sortedResults.length > 0"
             @click="showEditAnalysisDialog = true; currentAnalysis = result">
             <h2>{{ dateToLocaleString(result.date) }}</h2>
             <div class="form">
