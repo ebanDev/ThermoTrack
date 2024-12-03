@@ -352,13 +352,13 @@ onMounted(() => {
 
     <div class="card active">
       <h3>
-        Score de contraception : {{ wearingScore.toFixed(1) }}%
+        Score de contraception : {{ Math.floor(wearingScore *10)/10 }}%
       </h3>
       <p v-if="wearingScore === 100">
         🎉 Vous avez porté votre contraception tous les jours pendant la durée recommandée sur les trois deniers mois.
       </p>
       <p v-else>
-        ⚠️ Vous avez manqué l'équivalent de {{ Math.round((100 - wearingScore) * .9 * 10) / 10 }} jours de port de
+        ⚠️ Vous avez manqué l'équivalent de {{ Math.floor((100 - wearingScore) * .9 * 10) / 10 }} jours de port de
         contraception sur les trois derniers mois.
       </p>
     </div>
