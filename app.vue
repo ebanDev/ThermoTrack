@@ -18,6 +18,7 @@
 
 <script setup>
 let deferredPrompt;
+const userPrefs = useUserPrefsStore();
 
 const installPWA = () => {
   if (deferredPrompt) {
@@ -27,6 +28,7 @@ const installPWA = () => {
         console.log('User accepted the A2HS prompt');
       } else {
         console.log('User dismissed the A2HS prompt');
+        userPrefs.installDeniedCount++;
       }
       deferredPrompt = null;
     });
@@ -44,7 +46,7 @@ onMounted(() => {
   } else {
     console.log('Launched: Browser');
 
-    if ('serviceWorker' in navigator) {
+    if ('serviceWorker' in navigator && userPrefs.installDeniedCount < 3) {
       window.addEventListener('beforeinstallprompt', (e) => {
         e.preventDefault();
         deferredPrompt = e;

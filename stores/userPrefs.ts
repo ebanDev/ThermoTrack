@@ -5,6 +5,7 @@ export const useUserPrefsStore = defineStore('userPrefs', () => {
 
     const wearingGoal = ref(15);
     const dayStartAt = ref('05:00');
+    const installDeniedCount = ref(0);
 
     const resetPreferences = () => {
         wearingSessions.value = [];
@@ -18,6 +19,7 @@ export const useUserPrefsStore = defineStore('userPrefs', () => {
         dayStartAt,
         resetPreferences,
         analysisResults,
+        installDeniedCount,
     };
 }, {
     persist: true,
