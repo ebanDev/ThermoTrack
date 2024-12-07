@@ -1,6 +1,7 @@
 <script setup lang="ts">
 const route = useRoute()
 const showSettings = ref(false);
+const showChatAssistant = ref(false);
 
 const { wearingSessions, dayStartAt, wearingGoal } = storeToRefs(useUserPrefsStore());
 
@@ -20,7 +21,7 @@ function getSessionDay(date: Date) {
 function getStartOfDay(date: Date = new Date()) {
   const startOfDay = new Date(date);
   setToStartOfDay(startOfDay);
-  
+
   if (date.getHours() < 5) {
     startOfDay.setDate(startOfDay.getDate() - 1);
   }
@@ -29,8 +30,8 @@ function getStartOfDay(date: Date = new Date()) {
 }
 
 const groupedSessions = computed(() => {
-  const grouped: { 
-    date: string; 
+  const grouped: {
+    date: string;
     sessions: { start: Date; end: Date | null }[];
     total?: number;
   }[] = [];
@@ -38,7 +39,7 @@ const groupedSessions = computed(() => {
   wearingSessions.value.forEach(session => {
     const start = new Date(session.start);
     const end = session.end ? new Date(session.end) : null;
-    
+
     if (end) {
       // Check if session crosses 5 AM boundary
       const nextDay5AM = new Date(start);
@@ -48,13 +49,13 @@ const groupedSessions = computed(() => {
 
       if (start.getTime() < nextDay5AM.getTime() && end.getTime() > nextDay5AM.getTime()) {
         // Split the session
-        const firstPart = { 
-          start: start, 
-          end: nextDay5AM 
+        const firstPart = {
+          start: start,
+          end: nextDay5AM
         };
-        const secondPart = { 
-          start: nextDay5AM, 
-          end: end 
+        const secondPart = {
+          start: nextDay5AM,
+          end: end
         };
 
         // Add first part to first day
@@ -92,7 +93,7 @@ const groupedSessions = computed(() => {
         group = { date, sessions: [] };
         grouped.push(group);
       }
-      
+
       group.sessions.push({ start, end });
     }
   });
@@ -107,14 +108,14 @@ const groupedSessions = computed(() => {
       if (session.end) {
         const sessionStart = new Date(session.start);
         let sessionEnd = new Date(session.end);
-        
+
         if (sessionEnd < sessionStart) {
           sessionEnd = new Date(sessionEnd.getTime() + 24 * 60 * 60 * 1000);
         }
-        
+
         const effectiveStart = new Date(Math.max(sessionStart.getTime(), startOfDay.getTime()));
         const effectiveEnd = new Date(Math.min(sessionEnd.getTime(), endOfDay.getTime()));
-        
+
         const sessionDuration = (effectiveEnd.getTime() - effectiveStart.getTime()) / 3600000;
         return acc + (sessionDuration / wearingGoal.value) * 100;
       } else {
@@ -122,7 +123,7 @@ const groupedSessions = computed(() => {
         const sessionStart = new Date(session.start);
         const effectiveStart = new Date(Math.max(sessionStart.getTime(), startOfDay.getTime()));
         const effectiveEnd = new Date(Math.min(now.getTime(), endOfDay.getTime()));
-        
+
         const sessionDuration = (effectiveEnd.getTime() - effectiveStart.getTime()) / 3600000;
         return acc + (sessionDuration / wearingGoal.value) * 100;
       }
@@ -160,19 +161,24 @@ const streak = computed(() => {
 <template>
   <header>
     <h1>
-      <Icon name="i-tabler-left-fill" v-if="route.meta.showBackButton" @click="$router.back()"/>
-      {{ route.meta.title }}</h1>
+      <Icon name="i-tabler-left-fill" v-if="route.meta.showBackButton" @click="$router.back()" />
+      {{ route.meta.title }}
+    </h1>
     <div class="left">
       <span class="streak">
-      <Icon name="i-tabler-flame" />
-      {{ streak.count }}
-    </span>
+        <Icon name="i-tabler-flame" />
+        {{ streak.count }}
+      </span>
+      <button @click="showChatAssistant = true">
+        <Icon name="i-tabler-message-chatbot" />
+      </button>
       <button @click="showSettings = true">
-        <Icon name="i-tabler-settings"/>
+        <Icon name="i-tabler-settings" />
       </button>
     </div>
   </header>
-  <dialogs-settings v-if="showSettings" @close="showSettings = false"/>
+  <dialogs-settings v-if="showSettings" @close="showSettings = false" />
+  <dialogs-chat-assistant v-if="showChatAssistant" @close="showChatAssistant = false" />
 </template>
 
 <style scoped>
@@ -210,7 +216,7 @@ header {
   .left {
     display: flex;
     align-items: center;
-    gap: 1rem;
+    gap: .5rem;
 
     button {
       padding: 0.5rem;

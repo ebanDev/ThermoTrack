@@ -43,6 +43,10 @@ onMounted(() => {
     }, 1000);
   }
 });
+
+definePageMeta({
+    title: 'Accueil',
+});
 </script>
 
 <template>
