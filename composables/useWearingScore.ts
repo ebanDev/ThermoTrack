@@ -53,7 +53,6 @@ export const useWearingScore = (
       date.setDate(date.getDate() - i);
       const dateStr = getSessionDay(date);
       const dayData = groupedSessions.value.find(group => group.date === dateStr);
-      console.log(dayData);
       progress.unshift(dayData ? dayData.total : 0);
     }
     

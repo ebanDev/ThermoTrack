@@ -2,7 +2,41 @@
 import { Line } from 'vue-chartjs'
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend } from 'chart.js'
 
-ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend)
+// Register plugin globally
+ChartJS.register(
+  CategoryScale, 
+  LinearScale, 
+  PointElement, 
+  LineElement, 
+  Title, 
+  Tooltip, 
+  Legend,
+  {
+    id: 'drawRedZones',
+    beforeDraw: (chart) => {
+      const { ctx } = chart;
+      const { top, bottom } = chart.chartArea;
+      const meta = chart.getDatasetMeta(1); // Get metadata for progress dataset
+      
+      ctx.save();
+      
+      props.progress.forEach((value, index) => {
+        if (value < 100) {
+          const x = meta.data[index].x;
+          // Calculate the width between points
+          const pointSpacing = meta.data[1]?.x - meta.data[0]?.x ?? 20;
+          // Center the rectangle by moving half width to the left
+          const startX = x - (pointSpacing / 2);
+          
+          ctx.fillStyle = 'rgba(239, 68, 68, 0.5)';
+          ctx.fillRect(startX, top, pointSpacing, bottom - top);
+        }
+      });
+      
+      ctx.restore();
+    }
+  }
+);
 
 const props = defineProps<{
   scores: number[]
@@ -10,6 +44,8 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits(['close']);
+
+// Remove the separate drawRedZones object since it's now registered globally
 
 const chartData = computed(() => ({
   labels: Array.from({ length: props.scores.length }, (_, i) => {
@@ -32,6 +68,7 @@ const chartData = computed(() => ({
     tension: 0.1
   }]
 }));
+
 const chartOptions = {
   responsive: true,
   maintainAspectRatio: false,
