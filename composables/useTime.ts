@@ -1,32 +1,21 @@
-
 export function useTime(dayStartAt) {
-  function setToStartOfDay(date: Date) {
-    const [hours, minutes] = dayStartAt.value.split(':').map(Number);
-    date.setHours(hours, minutes, 0, 0);
-  }
-
-  function getStartOfDay(date: Date = new Date()) {
-    const startOfDay = new Date(date);
-    setToStartOfDay(startOfDay);
-
-    if (date.getHours() < 5) {
-      startOfDay.setDate(startOfDay.getDate() - 1);
-    }
-
-    return startOfDay;
-  }
-
-  function getSessionDay(date: Date) {
-    const sessionDate = new Date(date);
-    if (sessionDate.getHours() < 5) {
-      sessionDate.setDate(sessionDate.getDate() - 1);
-    }
-    return sessionDate.toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' });
-  }
-
-  return {
-    setToStartOfDay,
-    getStartOfDay,
-    getSessionDay,
+  const setToStartOfDay = d => {
+    const [h, m] = dayStartAt.value.split(':').map(Number);
+    d.setHours(h, m, 0, 0);
   };
+
+  const getStartOfDay = (d = new Date()) => {
+    const s = new Date(d);
+    setToStartOfDay(s);
+    if (d.getHours() < 5) s.setDate(s.getDate() - 1);
+    return s;
+  };
+
+  const getSessionDay = d => {
+    const sd = new Date(d);
+    if (sd.getHours() < 5) sd.setDate(sd.getDate() - 1);
+    return sd.toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' });
+  };
+
+  return { setToStartOfDay, getStartOfDay, getSessionDay };
 }

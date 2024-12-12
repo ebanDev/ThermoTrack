@@ -11,149 +11,99 @@ export function useSession(wearingSessions, wearingGoal, dayStartAt) {
     setToStartOfDay
   );
 
-  // Reactive variables
   const isWearing = ref(false);
-  const startTime = ref<Date | null>(null);
+  const startTime = ref<Date|null>(null);
   const currentTime = ref(new Date());
+  let timer: NodeJS.Timer;
 
-  // Session management functions
+  const updateCurrentTime = () => {
+    clearInterval(timer);
+    timer = setInterval(() => currentTime.value = new Date(), 1000);
+  };
+
+  const finishSession = (endTime: Date) => {
+    isWearing.value = false;
+    clearInterval(timer);
+    const session = wearingSessions.value.find(s => !s.end);
+    if (session) session.end = endTime;
+    startTime.value = null;
+  };
+
+  const promptTime = (msg: string) => {
+    const time = prompt(msg);
+    if (!time) return null;
+    const [h, m] = time.split(':').map(Number);
+    if (isNaN(h) || isNaN(m) || h < 0 || h > 23 || m < 0 || m > 59) {
+      alert('Heure invalide');
+      return null;
+    }
+    const now = new Date();
+    const d = new Date(now.getFullYear(), now.getMonth(), now.getDate(), h, m);
+    if (h < 5 || d > now) d.setDate(d.getDate() - 1);
+    return d;
+  };
+
   function startSession() {
     if (isWearing.value) return;
     isWearing.value = true;
     startTime.value = new Date();
-
-    wearingSessions.value.push({
-      start: startTime.value,
-      end: null,
-    });
-
-    clearInterval(timer);
-    timer = setInterval(() => {
-      currentTime.value = new Date();
-    }, 1000);
+    wearingSessions.value.push({ start: startTime.value, end: null });
+    updateCurrentTime();
   }
 
   function stopSession() {
     if (!isWearing.value) return;
-
-    isWearing.value = false;
-    clearInterval(timer);
-    const endTime = new Date();
-
-    const unfinishedSession = wearingSessions.value.find(session => !session.end);
-    if (unfinishedSession) {
-      unfinishedSession.end = endTime;
-    }
-
-    startTime.value = null;
+    finishSession(new Date());
   }
 
   function startSessionAt() {
-    const time = prompt('Entrez l\'heure de début (HH:MM)');
-    if (!time) return;
-
-    const [hours, minutes] = time.split(':').map(Number);
-    if (isNaN(hours) || isNaN(minutes) || hours < 0 || hours > 23 || minutes < 0 || minutes > 59) {
-      alert('Heure invalide');
-      return;
-    }
-
-    const now = new Date();
-    const start = new Date(now.getFullYear(), now.getMonth(), now.getDate(), hours, minutes);
-
-    // If the time is between midnight and 5 AM, or if the entered time is in the future,
-    // we need to adjust the date
-    if ((hours < 5) || (start > now)) {
-      start.setDate(start.getDate() - 1);
-    }
-
+    const d = promptTime("Entrez l'heure de début (HH:MM)");
+    if (!d) return;
     isWearing.value = true;
-    startTime.value = start;
-
-    wearingSessions.value.push({
-      start: start,
-      end: null,
-    });
-
-    clearInterval(timer);
-    timer = setInterval(() => {
-      currentTime.value = new Date();
-    }, 1000);
+    startTime.value = d;
+    wearingSessions.value.push({ start: d, end: null });
+    updateCurrentTime();
   }
 
   function stopSessionAt() {
-    const time = prompt('Entrez l\'heure de fin (HH:MM)');
-    if (!time) return;
-
-    const [hours, minutes] = time.split(':').map(Number);
-    if (isNaN(hours) || isNaN(minutes) || hours < 0 || hours > 23 || minutes < 0 || minutes > 59) {
-      alert('Heure invalide');
-      return;
-    }
-
-    const now = new Date();
-    const end = new Date(now.getFullYear(), now.getMonth(), now.getDate(), hours, minutes);
-
-    // If the time is between midnight and 5 AM, or if the entered time is in the future,
-    // we need to adjust the date
-    if ((hours < 5) || (end > now)) {
-      end.setDate(end.getDate() - 1);
-    }
-
-    isWearing.value = false;
-    clearInterval(timer);
-
-    const unfinishedSession = wearingSessions.value.find(session => !session.end);
-    if (unfinishedSession) {
-      unfinishedSession.end = end;
-    }
-
-    startTime.value = null;
+    const d = promptTime("Entrez l'heure de fin (HH:MM)");
+    if (!d) return;
+    finishSession(d);
   }
 
-  // Computed properties
   const totalTime = computed(() => {
-    const totalSeconds = getTotalTimeWornToday(isWearing.value, startTime.value, currentTime.value);
-    const hours = Math.floor(totalSeconds / 3600);
-    const minutes = String(Math.floor((totalSeconds % 3600) / 60)).padStart(2, '0');
-    const seconds = String(Math.floor(totalSeconds % 60)).padStart(2, '0');
-    return `${hours}:${minutes}:${seconds}`;
+    const total = getTotalTimeWornToday(isWearing.value, startTime.value, currentTime.value);
+    const h = Math.floor(total / 3600),
+          m = String(Math.floor((total % 3600) / 60)).padStart(2,'0'),
+          s = String(Math.floor(total % 60)).padStart(2,'0');
+    return `${h}:${m}:${s}`;
   });
 
   const estEndTime = computed(() => {
-    const totalSeconds = wearingGoal.value * 3600;
-    const remaining = totalSeconds - getTotalTimeWornToday(isWearing.value, startTime.value, currentTime.value);
-
+    const totalNeeded = wearingGoal.value * 3600;
+    const remaining = totalNeeded - getTotalTimeWornToday(isWearing.value, startTime.value, currentTime.value);
     if (remaining > 0) {
-      const end = new Date(new Date().getTime() + remaining * 1000);
-      const hours = String(end.getHours()).padStart(2, '0');
-      const minutes = String(end.getMinutes()).padStart(2, '0');
-      return `Fin à ${hours}:${minutes}`;
+      const end = new Date(Date.now() + remaining * 1000);
+      return `Fin à ${String(end.getHours()).padStart(2,'0')}:${String(end.getMinutes()).padStart(2,'0')}`;
     } else {
       const surplus = Math.abs(remaining);
-      const hours = String(Math.floor(surplus / 3600)).padStart(2, '0');
-      const minutes = String(Math.floor((surplus % 3600) / 60)).padStart(2, '0');
-      return `+${hours}:${minutes}`;
+      const h = String(Math.floor(surplus / 3600)).padStart(2,'0'),
+            m = String(Math.floor((surplus % 3600) / 60)).padStart(2,'0');
+      return `+${h}:${m}`;
     }
   });
 
   const progress = computed(() => {
-    const totalSeconds = wearingGoal.value * 3600;
-    return (getTotalTimeWornToday(isWearing.value, startTime.value, currentTime.value) / totalSeconds) * 100;
+    const totalNeeded = wearingGoal.value * 3600;
+    return (getTotalTimeWornToday(isWearing.value, startTime.value, currentTime.value) / totalNeeded) * 100;
   });
 
-  // Lifecycle hooks or timers
-  let timer: NodeJS.Timer;
-
   onMounted(() => {
-    const unfinishedSession = wearingSessions.value.find(session => !session.end);
-    if (unfinishedSession) {
+    const session = wearingSessions.value.find(s => !s.end);
+    if (session) {
       isWearing.value = true;
-      startTime.value = new Date(unfinishedSession.start);
-      clearInterval(timer);
-      timer = setInterval(() => {
-        currentTime.value = new Date();
-      }, 1000);
+      startTime.value = new Date(session.start);
+      updateCurrentTime();
     }
   });
 
