@@ -18,8 +18,12 @@ const { groupedSessions } = useSessionGroups(
 );
 
 const streak = computed(() => {
-  const index = groupedSessions.value.findIndex(group => group.total < 100);
-  return index === -1 ? groupedSessions.value.length : index;
+  // Skip today's session if it exists
+  const todayGroup = groupedSessions.value.find(group => group.date === getSessionDay(new Date()));
+  const completedSessions = groupedSessions.value.filter(group => group !== todayGroup);
+  
+  const index = completedSessions.findIndex(group => group.total < 100);
+  return index === -1 ? completedSessions.length : index;
 });
 </script>
 
