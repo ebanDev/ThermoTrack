@@ -18,14 +18,21 @@ ChartJS.register(
       const { top, bottom } = chart.chartArea;
       const meta = chart.getDatasetMeta(1); // Get metadata for progress dataset
       
+      // Guard clause: check if we have valid data
+      if (!meta?.data || meta.data.length === 0) return;
+      
       ctx.save();
       
       props.progress.forEach((value, index) => {
+        // Check if the data point exists before accessing its properties
+        const point = meta.data[index];
+        if (!point?.x) return;
+        
         if (value < 100) {
-          const x = meta.data[index].x;
-          // Calculate the width between points
-          const pointSpacing = meta.data[1]?.x - meta.data[0]?.x ?? 20;
-          // Center the rectangle by moving half width to the left
+          const x = point.x;
+          // Calculate width using a safe default if next point doesn't exist
+          const nextPoint = meta.data[1];
+          const pointSpacing = nextPoint ? (nextPoint.x - meta.data[0].x) : 20;
           const startX = x - (pointSpacing / 2);
           
           ctx.fillStyle = 'rgba(239, 68, 68, 0.5)';
@@ -48,21 +55,21 @@ const emit = defineEmits(['close']);
 // Remove the separate drawRedZones object since it's now registered globally
 
 const chartData = computed(() => ({
-  labels: Array.from({ length: props.scores.length }, (_, i) => {
+  labels: Array.from({ length: props.scores.length - 1 }, (_, i) => {
     const date = new Date();
     date.setDate(date.getDate() - (props.scores.length - 1 - i));
     return date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
   }),
   datasets: [{
     label: 'Score de contraception',
-    data: props.scores,
+    data: props.scores.slice(0, -1),
     fill: false,
     borderColor: 'rgba(11, 58, 107, 1)',
     tension: 0.1,
     pointRadius: 0 // Hide individual points
   }, {
     label: 'Pourcentage journalier',
-    data: props.progress,
+    data: props.progress.slice(0, -1),
     fill: false,
     borderColor: 'rgba(0, 86, 179, 1)',
     tension: 0.1

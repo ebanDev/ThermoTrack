@@ -17,27 +17,26 @@ const dateToLocaleString = (date: string) => new Date(date).toLocaleDateString("
 const sortedResults = computed(() => analysisResults.value.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()));
 const invertedResults = computed(() => sortedResults.value.slice().reverse());
 
-const concentrations = invertedResults.value.map(result => result.concentration);
-const roundCells = invertedResults.value.map(result => result.roundCells);
+const concentrations = computed(() => invertedResults.value.map(result => result.concentration));
+const roundCells = computed(() => invertedResults.value.map(result => result.roundCells));
 
-
-const chartData = reactive({
+const chartData = computed(() => ({
     labels: invertedResults.value.map(result => new Date(result.date).toLocaleDateString("fr-FR", { month: "short", year: "numeric" })),
     datasets: [
         {
             label: 'Concentration',
-            data: concentrations,
+            data: concentrations.value,
             borderColor: 'rgba(11, 58, 107, 1)',
             backgroundColor: 'rgba(11, 58, 107, 0.2)',
         },
         {
             label: 'Cellules rondes',
-            data: roundCells,
+            data: roundCells.value,
             borderColor: 'rgba(0, 86, 179, 1)',
             backgroundColor: 'rgba(0, 86, 179, 0.2)',
         },
     ],
-});
+}));
 
 const chartOptions = reactive({
     scales: {
@@ -61,73 +60,84 @@ const swiper = useSwiper(swiperRef, {
     spaceBetween: 30,
 });
 
-const availableTips = [
-    {
-        text: "Vous avez atteint le seuil contraceptif ! (Concentration < 1M/mL)",
-        condition: sortedResults.value[0].concentration < 1 && sortedResults.value[0].concentration !== 0,
-    },
-    {
-        text: "Vous avez atteint l'azoospermie complète ! (absence de spermatozoïdes)",
-        condition: sortedResults.value[0].concentration === 0,
-    },
-    {
-        text: "Vos dernières analyses remontent à plus de 3 mois, il est recommandé de faire un contrôle régulier.",
-        condition: new Date().getTime() - new Date(sortedResults.value[0].date).getTime() > 1000 * 60 * 60 * 24 * 30 * 3,
-    },
-    {
-        text: "Augmentation des cellules rondes pouvant être des spermatozoïdes immatures, contrôle recommandé dans 1 mois.",
-        condition: sortedResults.value[0].roundCells > sortedResults.value[1].roundCells,
-    }
-]
+const availableTips = computed(() => {
+    if (sortedResults.value.length < 1) return [];
+    
+    return [
+        {
+            text: "Vous avez atteint le seuil contraceptif ! (Concentration < 1M/mL)",
+            condition: sortedResults.value[0].concentration < 1 && sortedResults.value[0].concentration !== 0,
+        },
+        {
+            text: "Vous avez atteint l'azoospermie complète ! (absence de spermatozoïdes)",
+            condition: sortedResults.value[0].concentration === 0,
+        },
+        {
+            text: "Vos dernières analyses remontent à plus de 3 mois, il est recommandé de faire un contrôle régulier.",
+            condition: new Date().getTime() - new Date(sortedResults.value[0].date).getTime() > 1000 * 60 * 60 * 24 * 30 * 3,
+        },
+        {
+            text: "Augmentation des cellules rondes pouvant être des spermatozoïdes immatures, contrôle recommandé dans 1 mois.",
+            condition: sortedResults.value.length > 1 && sortedResults.value[0].roundCells > sortedResults.value[1].roundCells,
+        }
+    ];
+});
 
-const tips = computed(() => availableTips.filter(tip => tip.condition).map(tip => tip.text));
+const tips = computed(() => availableTips.value.filter(tip => tip.condition).map(tip => tip.text));
 </script>
 
 <template>
     <main class="container">
-        <div class="card">
-            <Line :data="chartData" :options="chartOptions" />
-        </div>
-        <swiper-container ref="swiperRef" :init="false" class="swiper" v-if="tips.length > 1">
-            <swiper-slide v-for="tip in tips" :key="tip">
-                <p class="card active">💡 {{ tip }}</p>
-            </swiper-slide>
-        </swiper-container>
-        <p class="card active" v-if="tips.length === 1">💡 {{ tips[0] }}</p>
-        <div class="card" v-for="result in sortedResults" :key="result.id" v-if="sortedResults.length > 0"
-            @click="showEditAnalysisDialog = true; currentAnalysis = result">
-            <h2>{{ dateToLocaleString(result.date) }}</h2>
-            <div class="form">
-                <div class="form-item">
-                    <Icon name="i-tabler-flask" />
-                    <span><b>Concentration: {{ result.concentration }}</b></span>
-                </div>
-                <div class="form-item">
-                    <Icon name="i-tabler-cube" />
-                    <span>Volume (mL): {{ result.volume }}</span>
-                </div>
-                <div class="form-item">
-                    <Icon name="i-tabler-droplet" />
-                    <span>Viscosité: {{ result.viscosity }}</span>
-                </div>
-                <div class="form-item">
-                    <Icon name="i-tabler-test-pipe" />
-                    <span>pH: {{ result.pH }}</span>
-                </div>
-                <div class="form-item">
-                    <Icon name="i-tabler-droplet-filled-2" />
-                    <span>Cellules rondes (M/mL): {{ result.roundCells }}</span>
-                </div>
-                <div class="form-item">
-                    <Icon name="i-tabler-circle" />
-                    <span>Leucocytes (M/mL): {{ result.whiteBloodCells }}</span>
-                </div>
-                <div class="form-item" v-if="result.device">
-                    <Icon name="i-mdi-underwear-outline" />
-                    <span>Moyen contraceptif: {{ result.device }}</span>
+        <template v-if="sortedResults.length > 0">
+            <div class="card">
+                <Line :data="chartData" :options="chartOptions" />
+            </div>
+            <swiper-container ref="swiperRef" :init="false" class="swiper" v-if="tips.length > 1">
+                <swiper-slide v-for="tip in tips" :key="tip">
+                    <p class="card active">💡 {{ tip }}</p>
+                </swiper-slide>
+            </swiper-container>
+            <p class="card active" v-if="tips.length === 1">💡 {{ tips[0] }}</p>
+            <div class="card" v-for="result in sortedResults" :key="result.id"
+                @click="showEditAnalysisDialog = true; currentAnalysis = result">
+                <h2>{{ dateToLocaleString(result.date) }}</h2>
+                <div class="form">
+                    <div class="form-item">
+                        <Icon name="i-tabler-flask" />
+                        <span><b>Concentration: {{ result.concentration }}</b></span>
+                    </div>
+                    <div class="form-item">
+                        <Icon name="i-tabler-cube" />
+                        <span>Volume (mL): {{ result.volume }}</span>
+                    </div>
+                    <div class="form-item">
+                        <Icon name="i-tabler-droplet" />
+                        <span>Viscosité: {{ result.viscosity }}</span>
+                    </div>
+                    <div class="form-item">
+                        <Icon name="i-tabler-test-pipe" />
+                        <span>pH: {{ result.pH }}</span>
+                    </div>
+                    <div class="form-item">
+                        <Icon name="i-tabler-droplet-filled-2" />
+                        <span>Cellules rondes (M/mL): {{ result.roundCells }}</span>
+                    </div>
+                    <div class="form-item">
+                        <Icon name="i-tabler-circle" />
+                        <span>Leucocytes (M/mL): {{ result.whiteBloodCells }}</span>
+                    </div>
+                    <div class="form-item" v-if="result.device">
+                        <Icon name="i-mdi-underwear-outline" />
+                        <span>Moyen contraceptif: {{ result.device }}</span>
+                    </div>
                 </div>
             </div>
-        </div>
+        </template>
+        <template v-else>
+            <div class="card">
+                <p class="no-results">Aucun résultat pour le moment</p>
+            </div>
+        </template>
         <button @click="showAddAnalysisDialog = true">
             <Icon name="i-tabler-plus" />
             Ajouter un résultat
@@ -168,5 +178,11 @@ button {
             font-size: 1rem;
         }
     }
+}
+
+.no-results {
+    text-align: center;
+    padding: 2rem;
+    color: var(--color-text-secondary);
 }
 </style>
