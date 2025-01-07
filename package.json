@@ -7,7 +7,7 @@
     "dev": "nuxt dev",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
-    "postinstall": "nuxt prepare"
+    "postinstall": "bash fixTreewalker.sh && nuxt prepare"
   },
   "dependencies": {
     "@nuxt/fonts": "^0.7.2",
