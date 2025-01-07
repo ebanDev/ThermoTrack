@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # File path to the JSON file
-jsonFilePath="./node_modules/@rollup/plugin-json/node_modules/@rollup/pluginutils/node_modules/estree-walker/package.json"
+jsonFilePath="./node_modules/@rollup/pluginutils/node_modules/estree-walker/package.json"
 
 # Create the new exports structure
 newExports='{
