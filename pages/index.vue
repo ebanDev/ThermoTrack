@@ -2,6 +2,7 @@
 import { useSession } from '~/composables/useSession';
 import { useTime } from '~/composables/useTime';
 import { useSessionGroups } from '~/composables/useSessionGroups';
+import { kButton, kCard, kList, kListItem } from 'konsta/vue';
 
 const userPrefsStore = useUserPrefsStore();
 const { wearingSessions, wearingGoal, dayStartAt } = storeToRefs(userPrefsStore);
@@ -45,152 +46,83 @@ onMounted(() => {
 });
 
 definePageMeta({
-    title: 'Accueil',
+  title: 'Accueil',
 });
 </script>
 
 <template>
-  <main class="container">
-    <div class="countdown-container">
+  <main class="flex flex-col pt-8 h-full gap-6">
+    <div class="relative w-[200px] h-[200px] mx-auto">
       <progress-circle :progress="progress" :text="totalTime" :subtext="estEndTime" :size="200" :strokeWidth="15" />
     </div>
 
-    <div class="controls">
-      <button @click="startSession" v-if="!isWearing">
-        <Icon name="i-tabler-play" />
+    <div class="flex gap-4 justify-center w-full px-4">
+      <k-button v-if="!isWearing" @click="startSession" class="w-full">
+        <Icon name="i-tabler-play" class="mr-2" />
         Démarrer
-      </button>
-      <button @click="stopSession" v-else>
-        <Icon name="i-tabler-player-pause" />
+      </k-button>
+      <k-button v-else @click="stopSession" class="w-full">
+        <Icon name="i-tabler-player-pause" class="mr-2" />
         Arrêter
-      </button>
-      <button @click="startSessionAt" v-if="!isWearing">
-        <Icon name="i-tabler-rotate-clockwise" />
+      </k-button>
+      <k-button v-if="!isWearing" @click="startSessionAt" class="w-full">
+        <Icon name="i-tabler-rotate-clockwise" class="mr-2" />
         Démarrer à...
-      </button>
-      <button @click="stopSessionAt" v-else>
-        <Icon name="i-tabler-rotate" />
+      </k-button>
+      <k-button v-else @click="stopSessionAt" class="w-full">
+        <Icon name="i-tabler-rotate" class="mr-2" />
         Arrêter à...
-      </button>
+      </k-button>
     </div>
 
-    <div class="card active" @click="showScoreDialog = true">
-      <h3>
-        Score de contraception : {{ Math.floor(currentWearingScore * 10)/10 }}%
+    <k-card class="mx-4" @click="showScoreDialog = true">
+      <h3 class="text-lg font-bold mb-2">
+        Score de contraception : {{ Math.floor(currentWearingScore * 10) / 10 }}%
       </h3>
       <p v-if="currentWearingScore === 100">
         🎉 Vous avez porté votre contraception tous les jours pendant la durée recommandée sur les trois deniers mois.
       </p>
       <p v-else>
-        ⚠️ Vous avez manqué l'équivalent de {{ Math.floor((100 - currentWearingScore) * .9 * 10) / 10 }} jours de port de
+        ⚠️ Vous avez manqué l'équivalent de {{ Math.floor((100 - currentWearingScore) * .9 * 10) / 10 }} jours de port
+        de
         contraception sur les trois derniers mois.
       </p>
-    </div>
+    </k-card>
 
-    <div class="sessions">
-      <h2 class="sessions-title">Historique</h2>
-      <div class="sessions-list">
-        <div v-for="group in groupedSessions" :key="group.date" class="card sessionCard">
-          <div class="left">
-            <h3>
-              {{ group.date }}
-            </h3>
-            <ul>
-              <li v-for="session in [...group.sessions].sort((a, b) => a.start.getTime() - b.start.getTime())"
-                :key="session.start" @click="currentSessionGroup = group; showSessionDialog = true">
-                {{ new Date(session.start).toLocaleTimeString('fr-FR', {
-                  hour: '2-digit', minute: '2-digit', hour12:
-                    false
-                })
-                }} -
-                {{ session.end ? new Date(session.end).toLocaleTimeString('fr-FR', {
-                  hour: '2-digit', minute: '2-digit',
-                  hour12: false
-                }) : 'En cours' }}
-                ({{ session.end ?
-                  (((session.end.getTime() < session.start.getTime() ? session.end.getTime() + 86400000 :
-                    session.end.getTime()) - session.start.getTime()) / 3600000).toFixed(1) : ((new Date().getTime() -
-                      session.start.getTime()) / 3600000).toFixed(1) }}h) </li>
-              <li>
-                <b>
-                  Total: {{ (wearingGoal * (group.total / 100)).toFixed(1) }}h
-                </b>
-              </li>
-            </ul>
+    <div class="px-4">
+      <h2 class="text-xl font-bold mb-3">Historique</h2>
+      <div class="flex flex-col">
+        <k-card v-for="group in groupedSessions" :key="group.date" class="mx-0 my-2">
+          <div class="flex gap-2 items-start justify-between">
+            <div>
+              <h3 class="font-bold text-base mb-2">{{ group.date }}</h3>
+              <div class="flex flex-col gap-1">
+                <k-block v-for="session in [...group.sessions].sort((a, b) => a.start.getTime() - b.start.getTime())"
+                  :key="session.start" class="cursor-pointer"
+                  @click="currentSessionGroup = group; showSessionDialog = true">
+                  {{ new Date(session.start).toLocaleTimeString('fr-FR', {
+                    hour: '2-digit', minute: '2-digit', hour12: false
+                  }) }} -
+                  {{ session.end ? new Date(session.end).toLocaleTimeString('fr-FR', {
+                    hour: '2-digit', minute: '2-digit', hour12: false
+                  }) : 'En cours' }}
+                  ({{ session.end ? (((session.end.getTime() < session.start.getTime() ? session.end.getTime() +
+                    86400000 : session.end.getTime()) - session.start.getTime()) / 3600000).toFixed(1) : ((new
+                      Date().getTime() - session.start.getTime()) / 3600000).toFixed(1) }}h) </k-block>
+                    <k-block class="font-bold">
+                      Total: {{ (wearingGoal * (group.total / 100)).toFixed(1) }}h
+                    </k-block>
+              </div>
+            </div>
+            <progress-circle :progress="group.total" :size="50" :strokeWidth="8" />
           </div>
-          <progress-circle :progress="group.total" :size="50" :strokeWidth="8" />
-        </div>
+        </k-card>
       </div>
     </div>
+
     <dialogs-edit-sessions v-if="showSessionDialog" :sessionGroup="currentSessionGroup"
       @close="showSessionDialog = false" />
-    <dialogs-wearing-score 
-      v-if="showScoreDialog" 
-      :scores="historicalScores"
-      :progress="historicalProgress"
-      @close="showScoreDialog = false" 
-    />
+    <dialogs-wearing-score v-if="showScoreDialog" :scores="historicalScores" :progress="historicalProgress"
+      @close="showScoreDialog = false" />
   </main>
 </template>
-
-<style scoped>
-.container {
-  display: flex;
-  flex-direction: column;
-  padding-top: 2rem;
-  height: 100%;
-  gap: 1.5rem;
-}
-
-.countdown-container {
-  position: relative;
-  width: 200px;
-  height: 200px;
-  margin: 0 auto;
-}
-
-.countdown-time {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  font-size: 2rem;
-}
-
-.controls {
-  display: flex;
-  gap: 1rem;
-  justify-content: center;
-  width: 100%;
-
-  button {
-    width: 100%;
-  }
-}
-
-.sessions-list {
-  display: flex;
-  flex-direction: column;
-  gap: .75rem;
-  margin-top: .75rem;
-}
-
-.sessionCard {
-  display: flex;
-  gap: 1rem;
-  flex-direction: row;
-
-  .left {
-    display: flex;
-    flex-direction: column;
-    gap: .5rem;
-    width: 100%;
-
-    ul {
-      padding: 0;
-      list-style: none;
-      margin: 0;
-    }
-  }
-}
-</style>

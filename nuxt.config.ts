@@ -9,7 +9,7 @@ export default defineNuxtConfig({
         "@pinia-plugin-persistedstate/nuxt",
         "nuxt-swiper"
     ],
-    css: ["~/static/css/base.css"],
+    css: ["~/static/css/base.css", "~/static/css/tailwind.css"],
 
     app: {
         head: {
@@ -52,5 +52,16 @@ export default defineNuxtConfig({
 
     piniaPersistedstate: {
         storage: 'localStorage',
+    },
+
+    postcss: {
+        plugins: {
+            tailwindcss: {},
+            autoprefixer: {},
+        },
+    },
+
+    build: {
+        transpile: ['konsta'],
     },
 })

@@ -1,18 +1,13 @@
 <template>
-  <top-bar/>
-  <slot/>
-  <tab-bar/>
+  <k-page>
+    <top-bar />
+      <main class="mb-32">
+        <slot />
+      </main>
+    <tab-bar />
+  </k-page>
 </template>
 
-<style>
-main {
-  display: flex;
-  align-items: start;
-  flex-direction: column;
-  height: calc(100vh - 56px);
-  padding: 20px 20px calc(20px + 80px);
-  gap: 16px;
-  overflow-y: scroll;
-  overflow-x: hidden;
-}
-</style>
+<script setup>
+import { kPage } from 'konsta/vue';
+</script>

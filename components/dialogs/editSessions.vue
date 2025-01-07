@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { kSheet, kToolbar, kLink, kBlock, kList, kListInput, kButton } from 'konsta/vue';
+
 const props = defineProps({
     sessionGroup: {
         type: Object,
@@ -87,27 +89,44 @@ function removeSession(session) {
 </script>
 
 <template>
-    <div class="shadowClose" @click="emit('close')"></div>
-    <dialog open>
-        <h2>{{ sessionGroup.date }} </h2>
-        <div class="form">
-            <div class="session" v-for="session in newSessionGroup.sessions" :key="session.start">
-                <input type="time" id="start" v-model="session.start" />
-                <input type="time" id="end" v-model="session.end" />
-                <button @click="removeSession(session)">
-                    <Icon name="i-tabler-trash" />
-                </button>
-            </div>
-        </div>
-        <button @click="addNewSession">
-            <Icon name="i-tabler-plus" />
-            Ajouter une session
-        </button>
-        <button @click="save">
-            <Icon name="i-tabler-device-floppy" />
-            Enregistrer
-        </button>
-    </dialog>
+  <k-sheet
+    class="pb-safe w-full"
+    :opened="opened"
+    @backdropclick="emit('close')"
+  >
+    <k-toolbar top>
+      <div class="left" />
+      <div class="right">
+        <k-link toolbar @click="save">Enregistrer</k-link>
+      </div>
+    </k-toolbar>
+
+    <k-block>
+      <h2 class="text-xl font-bold mb-4">{{ sessionGroup.date }}</h2>
+      <k-list strong inset class="mb-4">
+        <template v-for="session in newSessionGroup.sessions" :key="session.start">
+          <k-list-input
+            type="time"
+            label="Début"
+            :value="session.start"
+            @input="session.start = $event.target.value"
+          />
+          <k-list-input
+            type="time"
+            label="Fin"
+            :value="session.end"
+            @input="session.end = $event.target.value"
+          />
+          <k-button @click="removeSession(session)" class="mb-4">Supprimer</k-button>
+        </template>
+      </k-list>
+      
+      <k-button @click="addNewSession" class="w-full">
+        <Icon name="i-tabler-plus" class="mr-2" />
+        Ajouter une session
+      </k-button>
+    </k-block>
+  </k-sheet>
 </template>
 
 <style scoped>

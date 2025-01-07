@@ -1,7 +1,9 @@
 <template>
-  <NuxtLayout>
-    <NuxtPage />
-  </NuxtLayout>
+  <k-app theme="material">
+    <NuxtLayout>
+      <NuxtPage />
+    </NuxtLayout>
+  </k-app>
 </template>
 
 <style>
@@ -17,6 +19,7 @@
 </style>
 
 <script setup>
+import { kApp } from 'konsta/vue';
 let deferredPrompt;
 const userPrefs = useUserPrefsStore();
 

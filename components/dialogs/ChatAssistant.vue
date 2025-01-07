@@ -1,6 +1,11 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import OpenAI from 'openai';
+import { kSheet, kToolbar, kLink, kBlock, kBlockTitle, kList, kListInput, kButton } from 'konsta/vue';
+
+defineProps<{
+  opened: boolean
+}>();
 
 const emit = defineEmits(['close']);
 const { disclaimerAccepted, apiKey } = storeToRefs(useUserPrefsStore());
@@ -108,52 +113,83 @@ async function validateApiKey() {
 </script>
 
 <template>
-  <div class="shadowClose" @click="emit('close')"></div>
-  <dialog open v-if="!showDisclaimer">
-    <h2>Assistant</h2>
-    <div class="conversation">
-      <div v-for="(message, index) in messages" :key="index" :class="message.role">
-        <p>{{ message.content }}</p>
+  <k-sheet
+    class="pb-safe w-full"
+    :opened="opened"
+    @backdropclick="emit('close')"
+  >
+    <k-toolbar top>
+      <div class="left" />
+      <div class="right">
+        <k-link toolbar @click="emit('close')">Fermer</k-link>
       </div>
-    </div>
-    <div class="context">
-      <p class="context-title">Contexte donné à l'IA</p>
-      <div class="chips">
-        <button class="chip" :class="{ active: includeWearingSessions }"
-          @click="includeWearingSessions = !includeWearingSessions">
-          Historique
-        </button>
-        <button class="chip" :class="{ active: includeAnalysis }" @click="includeAnalysis = !includeAnalysis">
-          Spermogrammes
-        </button>
+    </k-toolbar>
+
+    <k-block v-if="!showDisclaimer">
+      <div class="conversation overflow-y-auto max-h-[400px] mb-4 flex flex-col gap-2">
+        <div v-for="(message, index) in messages" :key="index" 
+          :class="[
+            'p-2 rounded-lg max-w-[85%] break-words',
+            message.role === 'user' ? 'self-end bg-md-light-primary text-white' : 'bg-md-light-surface-variant'
+          ]"
+        >
+          <p>{{ message.content }}</p>
+        </div>
       </div>
-    </div>
-    <div class="input-area">
-      <input type="text" v-model="userMessage" @keydown.enter="sendMessage" placeholder="Type your message..."
-        :disabled="isLoading" />
-      <button @click="sendMessage" :disabled="isLoading">
-        <Icon :name="isLoading ? 'i-tabler-hourglass-high' : 'i-tabler-send'" />
-      </button>
-    </div>
-  </dialog>
-  <dialog open v-if="showDisclaimer">
-    <h2>AndroBot</h2>
-    <p>
-      Ceci est un chatbot qui utilise l'intelligence artificielle générative de OpenAI pour répondre à vos questions.
-      <br> Il est possible que les réponses ne soient pas toujours exactes ou appropriées.
-    </p>
-    <div class="form">
-      <label for="apiKey">
-        <Icon name="i-tabler-brand-openai" />
-        Clé API OpenAI
-      </label>
-      <input type="text" v-model="apiKey" placeholder="sk-..." />
-    </div>
-    <button @click="validateApiKey">
-      <Icon name="i-tabler-check" />
-      Continuer
-    </button>
-  </dialog>
+
+      <div class="mb-4">
+        <p class="font-bold mb-2">Contexte donné à l'IA</p>
+        <div class="flex gap-2">
+          <k-button 
+            :class="includeWearingSessions ? 'bg-md-light-primary' : ''"
+            @click="includeWearingSessions = !includeWearingSessions"
+          >
+            Historique
+          </k-button>
+          <k-button 
+            :class="includeAnalysis ? 'bg-md-light-primary' : ''"
+            @click="includeAnalysis = !includeAnalysis"
+          >
+            Spermogrammes
+          </k-button>
+        </div>
+      </div>
+
+      <div class="flex gap-2">
+        <k-list-input
+          type="text"
+          v-model="userMessage"
+          @keydown.enter="sendMessage"
+          placeholder="Votre message..."
+          :disabled="isLoading"
+          class="flex-1"
+        />
+        <k-button @click="sendMessage" :disabled="isLoading">
+          <Icon :name="isLoading ? 'i-tabler-hourglass-high' : 'i-tabler-send'" />
+        </k-button>
+      </div>
+    </k-block>
+
+    <k-block v-else>
+      <h2 class="text-xl font-bold mb-4">AndroBot</h2>
+      <p class="mb-4">
+        Ceci est un chatbot qui utilise l'intelligence artificielle générative de OpenAI pour répondre à vos questions.
+        <br> Il est possible que les réponses ne soient pas toujours exactes ou appropriées.
+      </p>
+      <k-list strong inset>
+        <k-list-input
+          label="Clé API OpenAI"
+          type="text"
+          v-model="apiKey"
+          placeholder="sk-..."
+        />
+      </k-list>
+      <k-button class="w-full mt-4" @click="validateApiKey">
+        <Icon name="i-tabler-check" class="mr-2" />
+        Continuer
+      </k-button>
+    </k-block>
+  </k-sheet>
 </template>
 
 <style scoped>

@@ -1,5 +1,11 @@
 <script setup lang="ts">
-const emit = defineEmits();
+import { kSheet, kToolbar, kLink, kBlock, kBlockTitle, kList, kListInput, kListItem } from 'konsta/vue';
+
+defineProps<{
+  opened: boolean
+}>();
+
+const emit = defineEmits(['close']);
 const userPrefsStore = useUserPrefsStore();
 const { analysisResults, wearingGoal, dayStartAt, wearingSessions } = storeToRefs(userPrefsStore);
 
@@ -50,35 +56,65 @@ function resetData() {
 </script>
 
 <template>
-  <div class="shadowClose" @click="emit('close')"></div>
-  <dialog open>
-    <h2>Paramètres</h2>
-    <div class="setting">
-      <label for="wearingGoal">Objectif de port (en heures)</label>
-      <input type="number" id="wearingGoal" v-model="wearingGoal" />
-      <label for="dayStartAt">Début de la journée</label>
-      <input type="time" id="dayStartAt" v-model="dayStartAt" />
-    </div>
-    <button @click="emit('close')">
-      <Icon name="i-tabler-device-floppy" />
-      Enregistrer
-    </button>
+  <k-sheet
+    class="pb-safe w-full"
+    :opened="opened"
+    @backdropclick="emit('close')"
+  >
+    <k-toolbar top>
+      <div class="left" />
+      <div class="right">
+        <k-link toolbar @click="emit('close')">Fermer</k-link>
+      </div>
+    </k-toolbar>
 
-    <hr>
+    <k-block>
+      <k-block-title>Paramètres de port</k-block-title>
+      <k-list strong inset>
+        <k-list-input
+          label="Objectif de port (en heures)"
+          type="number"
+          :value="wearingGoal"
+          @input="wearingGoal = $event.target.value"
+        />
+        <k-list-input
+          label="Début de la journée"
+          type="time"
+          :value="dayStartAt"
+          @input="dayStartAt = $event.target.value"
+        />
+      </k-list>
 
-    <button @click="resetData">
-      <Icon name="i-tabler-rotate-clockwise" />
-      Réinitialiser les données
-    </button>
-
-    <button @click="exportData">
-      <Icon name="i-tabler-download" />
-      Exporter les données
-    </button>
-
-    <button @click="importData">
-      <Icon name="i-tabler-upload" />
-      Importer les données
-    </button>
-  </dialog>
+      <k-block-title>Gestion des données</k-block-title>
+      <k-list strong inset>
+        <k-list-item
+          link
+          @click="resetData"
+          title="Réinitialiser les données"
+        >
+          <template #media>
+            <Icon name="i-tabler-rotate-clockwise" />
+          </template>
+        </k-list-item>
+        <k-list-item
+          link
+          @click="exportData"
+          title="Exporter les données"
+        >
+          <template #media>
+            <Icon name="i-tabler-download" />
+          </template>
+        </k-list-item>
+        <k-list-item
+          link
+          @click="importData"
+          title="Importer les données"
+        >
+          <template #media>
+            <Icon name="i-tabler-upload" />
+          </template>
+        </k-list-item>
+      </k-list>
+    </k-block>
+  </k-sheet>
 </template>

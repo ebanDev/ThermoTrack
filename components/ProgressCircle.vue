@@ -1,37 +1,51 @@
 <template>
-    <div class="progress-circle">
-        <svg :width="size" :height="size">
-            <circle
-                class="progress-ring__background"
-                :stroke-width="strokeWidth"
-                :r="normalizedRadius"
-                :cx="radius"
-                :cy="radius"
-            />
-            <circle
-                class="progress-ring__circle"
-                :stroke-width="strokeWidth"
-                :stroke-dasharray="circumference + ' ' + circumference"
-                :stroke-dashoffset="strokeDashoffset"
-                stroke-linecap="round"
-                :r="normalizedRadius"
-                :cx="radius"
-                :cy="radius"
-            />
-            <circle
-                v-if="progress > 100"
-                class="progress-ring__circle--extra"
-                :stroke-width="strokeWidth"
-                :stroke-dasharray="circumference + ' ' + circumference"
-                :stroke-dashoffset="extraStrokeDashoffset"
-                stroke-linecap="round"
-                :r="normalizedRadius"
-                :cx="radius"
-                :cy="radius"
-            />
-        </svg>
-        <div v-if="text" class="progress-text">{{ text }} <span>{{ subtext }}</span></div>
+  <div class="relative inline-block">
+    <svg :width="size" :height="size" class="rotate-[-90deg]">
+      <circle
+        class="fill-transparent stroke-md-light-outline-variant dark:stroke-md-dark-outline"
+        :stroke-width="strokeWidth"
+        :r="normalizedRadius"
+        :cx="radius"
+        :cy="radius"
+        stroke-color="#000"
+      />
+      <circle
+        class="fill-transparent stroke-md-light-primary dark:stroke-md-dark-primary transition-all duration-300"
+        :stroke-width="strokeWidth"
+        :stroke-dasharray="circumference + ' ' + circumference"
+        :stroke-dashoffset="strokeDashoffset"
+        stroke-linecap="round"
+        :r="normalizedRadius"
+        :cx="radius"
+        :cy="radius"
+      />
+      <circle
+        v-if="progress > 100"
+        class="fill-transparent stroke-md-light-on-primary-container transition-all duration-300"
+        :stroke-width="strokeWidth"
+        :stroke-dasharray="circumference + ' ' + circumference"
+        :stroke-dashoffset="extraStrokeDashoffset"
+        stroke-linecap="round"
+        :r="normalizedRadius"
+        :cx="radius"
+        :cy="radius"
+      />
+    </svg>
+    <div 
+      v-if="text" 
+      class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center flex flex-col items-center"
+    >
+      <span class="text-[1.75rem] font-extrabold text-md-light-on-surface dark:text-md-dark-on-surface">
+        {{ text }}
+      </span>
+      <span 
+        v-if="subtext"
+        class="text-[1.2rem] font-semibold text-md-light-on-surface-variant dark:text-md-dark-on-surface-variant whitespace-nowrap"
+      >
+        {{ subtext }}
+      </span>
     </div>
+  </div>
 </template>
 
 <script setup>
@@ -67,46 +81,3 @@ const circumference = computed(() => 2 * Math.PI * normalizedRadius.value);
 const strokeDashoffset = computed(() => circumference.value - (Math.min(props.progress, 100) / 100) * circumference.value);
 const extraStrokeDashoffset = computed(() => circumference.value - ((props.progress - 100) / 100) * circumference.value);
 </script>
-
-<style scoped>
-.progress-circle {
-    position: relative;
-    display: inline-block;
-}
-svg {
-    transform: rotate(-90deg);
-}
-.progress-ring__background {
-    fill: transparent;
-    stroke: var(--border-color);
-}
-.progress-ring__circle {
-    fill: transparent;
-    stroke: var(--cta-color);
-    transition: stroke-dashoffset var(--transition) linear;
-}
-.progress-ring__circle--extra {
-    fill: transparent;
-    stroke: var(--cta-hover-color);
-    transition: stroke-dashoffset var(--transition) linear;
-}
-.progress-text {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    font-size: 1.75rem;
-    font-weight: bolder;
-    color: var(--text-color);
-    text-align: center;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-
-    span {
-        font-size: 1.2rem;
-        font-weight: 600;
-        text-wrap: nowrap;
-    }
-}
-</style>

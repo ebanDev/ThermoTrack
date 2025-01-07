@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { Line } from 'vue-chartjs'
 import { Chart as ChartJS, Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale, PointElement, LineElement } from 'chart.js'
+import { kCard, kList, kListItem, kButton, kBlock, kBlockTitle } from 'konsta/vue';
 
 ChartJS.register(Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale, PointElement, LineElement)
 const { analysisResults } = storeToRefs(useUserPrefsStore());
@@ -87,65 +88,99 @@ const tips = computed(() => availableTips.value.filter(tip => tip.condition).map
 </script>
 
 <template>
-    <main class="container">
-        <template v-if="sortedResults.length > 0">
-            <div class="card">
-                <Line :data="chartData" :options="chartOptions" />
+  <main class="flex flex-col">
+    <template v-if="sortedResults.length > 0">
+      <k-card>
+        <Line :data="chartData" :options="chartOptions" />
+      </k-card>
+
+      <swiper-container ref="swiperRef" :init="false" v-if="tips.length > 1">
+        <swiper-slide v-for="tip in tips" :key="tip">
+          <k-card class="bg-md-light-surface-variant dark:bg-md-dark-surface-variant">
+            <div class="flex items-center gap-2">
+              <span class="text-xl">💡</span>
+              <p>{{ tip }}</p>
             </div>
-            <swiper-container ref="swiperRef" :init="false" class="swiper" v-if="tips.length > 1">
-                <swiper-slide v-for="tip in tips" :key="tip">
-                    <p class="card active">💡 {{ tip }}</p>
-                </swiper-slide>
-            </swiper-container>
-            <p class="card active" v-if="tips.length === 1">💡 {{ tips[0] }}</p>
-            <div class="card" v-for="result in sortedResults" :key="result.id"
-                @click="showEditAnalysisDialog = true; currentAnalysis = result">
-                <h2>{{ dateToLocaleString(result.date) }}</h2>
-                <div class="form">
-                    <div class="form-item">
-                        <Icon name="i-tabler-flask" />
-                        <span><b>Concentration: {{ result.concentration }}</b></span>
-                    </div>
-                    <div class="form-item">
-                        <Icon name="i-tabler-cube" />
-                        <span>Volume (mL): {{ result.volume }}</span>
-                    </div>
-                    <div class="form-item">
-                        <Icon name="i-tabler-droplet" />
-                        <span>Viscosité: {{ result.viscosity }}</span>
-                    </div>
-                    <div class="form-item">
-                        <Icon name="i-tabler-test-pipe" />
-                        <span>pH: {{ result.pH }}</span>
-                    </div>
-                    <div class="form-item">
-                        <Icon name="i-tabler-droplet-filled-2" />
-                        <span>Cellules rondes (M/mL): {{ result.roundCells }}</span>
-                    </div>
-                    <div class="form-item">
-                        <Icon name="i-tabler-circle" />
-                        <span>Leucocytes (M/mL): {{ result.whiteBloodCells }}</span>
-                    </div>
-                    <div class="form-item" v-if="result.device">
-                        <Icon name="i-mdi-underwear-outline" />
-                        <span>Moyen contraceptif: {{ result.device }}</span>
-                    </div>
-                </div>
-            </div>
-        </template>
-        <template v-else>
-            <div class="card">
-                <p class="no-results">Aucun résultat pour le moment</p>
-            </div>
-        </template>
-        <button @click="showAddAnalysisDialog = true">
-            <Icon name="i-tabler-plus" />
-            Ajouter un résultat
-        </button>
-        <dialogs-add-analysis v-if="showAddAnalysisDialog" @close="showAddAnalysisDialog = false" />
-        <dialogs-edit-analysis v-if="showEditAnalysisDialog" @close="showEditAnalysisDialog = false"
-            :analysis="currentAnalysis" />
-    </main>
+          </k-card>
+        </swiper-slide>
+      </swiper-container>
+
+      <k-card 
+        v-if="tips.length === 1"
+        class="bg-md-light-surface-variant dark:bg-md-dark-surface-variant"
+      >
+        <div class="flex items-center gap-2">
+          <span class="text-xl">💡</span>
+          <p>{{ tips[0] }}</p>
+        </div>
+      </k-card>
+
+      <k-card 
+        v-for="result in sortedResults" 
+        :key="result.id"
+        @click="showEditAnalysisDialog = true; currentAnalysis = result"
+      >
+        <k-block-title :with-block="false" class="!m-0 !p-0 text-base">
+          {{ dateToLocaleString(result.date) }}
+        </k-block-title>
+        <k-block class="!p-0 !pt-2 mt-2 mb-0 space-y-2">
+          <div class="flex items-center gap-2">
+            <Icon name="i-tabler-flask" />
+            <span class="font-bold">Concentration: {{ result.concentration }}</span>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <Icon name="i-tabler-cube" />
+            <span>Volume (mL): {{ result.volume }}</span>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <Icon name="i-tabler-droplet" />
+            <span>Viscosité: {{ result.viscosity }}</span>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <Icon name="i-tabler-test-pipe" />
+            <span>pH: {{ result.pH }}</span>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <Icon name="i-tabler-droplet-filled-2" />
+            <span>Cellules rondes (M/mL): {{ result.roundCells }}</span>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <Icon name="i-tabler-circle" />
+            <span>Leucocytes (M/mL): {{ result.whiteBloodCells }}</span>
+          </div>
+
+          <div v-if="result.device" class="flex items-center gap-2">
+            <Icon name="i-mdi-underwear-outline" />
+            <span>Moyen contraceptif: {{ result.device }}</span>
+          </div>
+        </k-block>
+      </k-card>
+    </template>
+
+    <k-card v-else class="text-center py-8 text-md-light-on-surface-variant dark:text-md-dark-on-surface-variant">
+      Aucun résultat pour le moment
+    </k-card>
+
+    <k-button class="mx-4 w-auto" @click="showAddAnalysisDialog = true">
+      <Icon name="i-tabler-plus" class="mr-2" />
+      Ajouter un résultat
+    </k-button>
+
+    <dialogs-add-analysis 
+      :opened="showAddAnalysisDialog" 
+      @close="showAddAnalysisDialog = false" 
+    />
+    <dialogs-edit-analysis 
+      :opened="showEditAnalysisDialog" 
+      @close="showEditAnalysisDialog = false"
+      :analysis="currentAnalysis" 
+    />
+  </main>
 </template>
 
 <style scoped>

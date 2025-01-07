@@ -1,5 +1,11 @@
 <script setup lang="ts">
-const emit = defineEmits();
+import { kSheet, kToolbar, kLink, kBlock, kBlockTitle, kList, kListInput } from 'konsta/vue';
+
+defineProps<{
+  opened: boolean
+}>();
+
+const emit = defineEmits(['close']);
 const { analysisResults } = storeToRefs(useUserPrefsStore());
 
 const newAnalysis = ref({
@@ -10,6 +16,7 @@ const newAnalysis = ref({
   pH: 0,
   roundCells: 0,
   whiteBloodCells: 0,
+  device: ''
 });
 
 function save() {
@@ -19,62 +26,109 @@ function save() {
 </script>
 
 <template>
-  <div class="shadowClose" @click="emit('close')"></div>
-  <dialog open>
-    <h2>Nouvelle analyse</h2>
-    <div class="form">
-        <label for="date">
-          <Icon name="i-tabler-calendar" />
-          Date
-        </label>
-        <input type="date" id="date" v-model="newAnalysis.date" />
+  <k-sheet
+    class="pb-safe w-full"
+    :opened="opened"
+    @backdropclick="emit('close')"
+  >
+    <k-toolbar top>
+      <div class="left" />
+      <div class="right">
+        <k-link toolbar @click="save">Enregistrer</k-link>
+      </div>
+    </k-toolbar>
 
-        <label for="volume">
-          <Icon name="i-tabler-cube" />
-          Volume (mL)
-        </label>
-        <input type="number" id="volume" v-model="newAnalysis.volume" />
+    <k-block>
+      <k-block-title>Nouvelle analyse</k-block-title>
+      <k-list strong inset>
+        <k-list-input
+          label="Date"
+          type="date"
+          :value="newAnalysis.date"
+          @input="newAnalysis.date = $event.target.value"
+        >
+          <template #media>
+            <Icon name="i-tabler-calendar" />
+          </template>
+        </k-list-input>
 
-        <label for="concentration">
-          <Icon name="i-tabler-flask" />
-          Concentration
-        </label>
-        <input type="number" id="concentration" v-model="newAnalysis.concentration" />
+        <k-list-input
+          label="Volume (mL)"
+          type="number"
+          :value="newAnalysis.volume"
+          @input="newAnalysis.volume = $event.target.value"
+        >
+          <template #media>
+            <Icon name="i-tabler-cube" />
+          </template>
+        </k-list-input>
 
-        <label for="viscosity">
-          <Icon name="i-tabler-droplet" />
-          Viscosité
-        </label>
-        <input type="text" id="viscosity" v-model="newAnalysis.viscosity" />
+        <k-list-input
+          label="Concentration"
+          type="number"
+          :value="newAnalysis.concentration"
+          @input="newAnalysis.concentration = $event.target.value"
+        >
+          <template #media>
+            <Icon name="i-tabler-flask" />
+          </template>
+        </k-list-input>
 
-        <label for="ph">
-          <Icon name="i-tabler-test-pipe" />
-          pH
-        </label>
-        <input type="number" id="ph" v-model="newAnalysis.pH" />
+        <k-list-input
+          label="Viscosité"
+          type="text"
+          :value="newAnalysis.viscosity"
+          @input="newAnalysis.viscosity = $event.target.value"
+        >
+          <template #media>
+            <Icon name="i-tabler-droplet" />
+          </template>
+        </k-list-input>
 
-        <label for="roundCells">
-          <Icon name="i-tabler-droplet-filled-2" />
-          Cellules rondes (M/mL)
-        </label>
-        <input type="text" id="roundCells" v-model="newAnalysis.roundCells" />
+        <k-list-input
+          label="pH"
+          type="number"
+          :value="newAnalysis.pH"
+          @input="newAnalysis.pH = $event.target.value"
+        >
+          <template #media>
+            <Icon name="i-tabler-test-pipe" />
+          </template>
+        </k-list-input>
 
-        <label for="whiteBloodCells">
-          <Icon name="i-tabler-circle" />
-          Leucocytes (M/mL)
-        </label>
-        <input type="text" id="whiteBloodCells" v-model="newAnalysis.whiteBloodCells" />
+        <k-list-input
+          label="Cellules rondes (M/mL)"
+          type="text"
+          :value="newAnalysis.roundCells"
+          @input="newAnalysis.roundCells = $event.target.value"
+        >
+          <template #media>
+            <Icon name="i-tabler-droplet-filled-2" />
+          </template>
+        </k-list-input>
 
-        <label for="device">
-          <Icon name="i-mdi-underwear-outline" />
-          Moyen contraceptif
-        </label>
-        <input type="text" id="device" v-model="newAnalysis.device" />
-    </div>
+        <k-list-input
+          label="Leucocytes (M/mL)"
+          type="text"
+          :value="newAnalysis.whiteBloodCells"
+          @input="newAnalysis.whiteBloodCells = $event.target.value"
+        >
+          <template #media>
+            <Icon name="i-tabler-circle" />
+          </template>
+        </k-list-input>
 
-    <button @click="save">
-      <Icon name="i-tabler-device-floppy" />
-      Enregistrer
-    </button>
-  </dialog>
+        <k-list-input
+          label="Moyen contraceptif"
+          type="text"
+          :value="newAnalysis.device"
+          @input="newAnalysis.device = $event.target.value"
+        >
+          <template #media>
+            <Icon name="i-mdi-underwear-outline" />
+          </template>
+        </k-list-input>
+      </k-list>
+    </k-block>
+  </k-sheet>
 </template>

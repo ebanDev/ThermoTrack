@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { Line } from 'vue-chartjs'
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend } from 'chart.js'
+import { kSheet, kToolbar, kLink, kBlock } from 'konsta/vue';
 
 // Register plugin globally
 ChartJS.register(
@@ -46,7 +47,8 @@ ChartJS.register(
 );
 
 const props = defineProps<{
-  scores: number[]
+  opened: boolean,
+  scores: number[],
   progress: number[]
 }>();
 
@@ -89,17 +91,25 @@ const chartOptions = {
 </script>
 
 <template>
-  <div class="shadowClose" @click="emit('close')"></div>
-  <dialog open>
-    <h2>Score de contraception</h2>
-    <div class="chart-container">
-      <Line :data="chartData" :options="chartOptions" />
-    </div>
-    <button @click="emit('close')">
-      <Icon name="i-tabler-x" />
-      Fermer
-    </button>
-  </dialog>
+  <k-sheet
+    class="pb-safe w-full"
+    :opened="opened"
+    @backdropclick="emit('close')"
+  >
+    <k-toolbar top>
+      <div class="left" />
+      <div class="right">
+        <k-link toolbar @click="emit('close')">Fermer</k-link>
+      </div>
+    </k-toolbar>
+
+    <k-block>
+      <h2 class="text-xl font-bold mb-4">Score de contraception</h2>
+      <div class="h-[300px] w-full mb-4">
+        <Line :data="chartData" :options="chartOptions" />
+      </div>
+    </k-block>
+  </k-sheet>
 </template>
 
 <style scoped>
