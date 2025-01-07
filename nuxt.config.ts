@@ -27,6 +27,7 @@ export default defineNuxtConfig({
         lang: "fr",
         display: "standalone",
         start_url: "/",
+        scope: "/",
         icons: [
           {
             src: "/favicon.png",
@@ -37,9 +38,7 @@ export default defineNuxtConfig({
       },
       workbox: {
         cleanupOutdatedCaches: true,
-        navigateFallback: '/en-US',
-        globPatterns: ['**/*.{js,css,html,png,svg,ico}'],
-        globIgnores: ['storybook/**.*', 'storybook/**/**.*'],
+        globPatterns: ["**/*"],
       },
       client: {
         installPrompt: true,

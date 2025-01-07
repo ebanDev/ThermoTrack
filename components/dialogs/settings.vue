@@ -9,8 +9,6 @@ const emit = defineEmits(['close']);
 const userPrefsStore = useUserPrefsStore();
 const { analysisResults, wearingGoal, dayStartAt, wearingSessions } = storeToRefs(userPrefsStore);
 
-// Remove the online/offline listeners, use $pwa instead
-
 function exportData() {
   const data = {
     analysisResults: analysisResults.value,
