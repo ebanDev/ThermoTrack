@@ -5,8 +5,8 @@
       <slot />
     </main>
     <tab-bar />
+    <pwa-notifications />
   </k-page>
-  <pwa-notifications />
 </template>
 
 <script setup>

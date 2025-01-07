@@ -57,25 +57,25 @@ definePageMeta({
     </div>
 
     <div class="flex gap-4 justify-center w-full px-4">
-      <k-button v-if="!isWearing" @click="startSession" class="w-full">
+      <k-button v-if="!isWearing" @click="startSession" class="w-full text-base">
         <Icon name="i-tabler-play" class="mr-2" />
         Démarrer
       </k-button>
-      <k-button v-else @click="stopSession" class="w-full">
+      <k-button v-else @click="stopSession" class="w-full text-base">
         <Icon name="i-tabler-player-pause" class="mr-2" />
         Arrêter
       </k-button>
-      <k-button v-if="!isWearing" @click="startSessionAt" class="w-full">
+      <k-button v-if="!isWearing" @click="startSessionAt" class="w-full text-base">
         <Icon name="i-tabler-rotate-clockwise" class="mr-2" />
         Démarrer à...
       </k-button>
-      <k-button v-else @click="stopSessionAt" class="w-full">
+      <k-button v-else @click="stopSessionAt" class="w-full text-base">
         <Icon name="i-tabler-rotate" class="mr-2" />
         Arrêter à...
       </k-button>
     </div>
 
-    <k-card class="mx-4" @click="showScoreDialog = true">
+    <k-card class="mx-4 !my-0" @click="showScoreDialog = true">
       <h3 class="text-lg font-bold mb-2">
         Score de contraception : {{ Math.floor(currentWearingScore * 10) / 10 }}%
       </h3>
