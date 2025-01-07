@@ -7,9 +7,33 @@ export default defineNuxtConfig({
         "@nuxtjs/google-fonts",
         "@pinia/nuxt",
         "@pinia-plugin-persistedstate/nuxt",
-        "nuxt-swiper"
+        "nuxt-swiper",
+        '@nuxtjs/pwa',
     ],
     css: ["~/static/css/base.css", "~/static/css/tailwind.css"],
+
+    pwa: {
+        icon: {
+            source: "~/public/favicon.png",
+        },
+
+        manifest: {
+            name: "ThermoTrack",
+            short_name: "ThermoTrack",
+            description: "ThermoTrack is a thermal contraception tracking PWA",
+            theme_color: "#e9ecef",
+            lang: "fr",
+            background_color: "#e9ecef",
+            scope: "/",
+            icons: [
+                {
+                    src: "/favicon.png",
+                    sizes: "512x512",
+                    type: "image/png",
+                },
+            ],
+        },
+    },
 
     app: {
         head: {
