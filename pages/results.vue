@@ -119,6 +119,7 @@ const tips = computed(() => availableTips.value.filter(tip => tip.condition).map
         v-for="result in sortedResults" 
         :key="result.id"
         @click="showEditAnalysisDialog = true; currentAnalysis = result"
+        class="my-2"
       >
         <k-block-title :with-block="false" class="!m-0 !p-0 text-base">
           {{ dateToLocaleString(result.date) }}
@@ -166,10 +167,12 @@ const tips = computed(() => availableTips.value.filter(tip => tip.condition).map
       Aucun résultat pour le moment
     </k-card>
 
-    <k-button class="mx-4 w-auto" @click="showAddAnalysisDialog = true">
-      <Icon name="i-tabler-plus" class="mr-2" />
-      Ajouter un résultat
-    </k-button>
+    <div class="mx-4 mt-4">
+      <k-button @click="showAddAnalysisDialog = true">
+        <Icon name="i-tabler-plus" class="mr-2" />
+        Ajouter un résultat
+      </k-button>
+    </div>
 
     <dialogs-add-analysis 
       :opened="showAddAnalysisDialog" 
