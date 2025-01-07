@@ -25,7 +25,7 @@
 
     <!-- Install PWA prompt -->
     <k-dialog
-      :opened="$pwa?.showInstallPrompt && !$pwa?.offlineReady && !$pwa?.needRefresh"
+      :opened="$pwa?.showInstallPrompt && $pwa?.offlineReady && !$pwa?.needRefresh"
       @backdropclick="$pwa?.cancelInstall"
     >
       <template #title>Installer l'application</template>
