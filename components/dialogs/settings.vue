@@ -9,6 +9,8 @@ const emit = defineEmits(['close']);
 const userPrefsStore = useUserPrefsStore();
 const { analysisResults, wearingGoal, dayStartAt, wearingSessions } = storeToRefs(userPrefsStore);
 
+// Remove the online/offline listeners, use $pwa instead
+
 function exportData() {
   const data = {
     analysisResults: analysisResults.value,
@@ -69,6 +71,15 @@ function resetData() {
     </k-toolbar>
 
     <k-block>
+      <k-block-title>État de l'application</k-block-title>
+      <k-list strong inset>
+        <k-list-item :title="$pwa?.offlineReady ? 'Prêt pour le mode hors ligne' : 'Installation en cours...'">
+          <template #media>
+            <Icon :name="$pwa?.offlineReady ? 'i-tabler-wifi-off' : 'i-tabler-loader-2'" />
+          </template>
+        </k-list-item>
+      </k-list>
+
       <k-block-title>Paramètres de port</k-block-title>
       <k-list strong inset>
         <k-list-input
