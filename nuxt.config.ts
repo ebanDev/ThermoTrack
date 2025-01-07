@@ -1,37 +1,57 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
+import process from 'node:process'
+
+const sw = process.env.SW === 'true'
+
 export default defineNuxtConfig({
     compatibilityDate: '2024-04-03',
     devtools: { enabled: false },
     modules: [
-        "@nuxt/icon",
-        "@nuxtjs/google-fonts",
-        "@pinia/nuxt",
-        "@pinia-plugin-persistedstate/nuxt",
-        "nuxt-swiper",
-        '@nuxtjs/pwa',
+      "@nuxt/icon",
+      "@nuxtjs/google-fonts",
+      "@pinia/nuxt",
+      "@pinia-plugin-persistedstate/nuxt",
+      "nuxt-swiper",
+      "@vite-pwa/nuxt",
     ],
     css: ["~/static/css/base.css", "~/static/css/tailwind.css"],
 
     pwa: {
-        icon: {
-            source: "~/public/favicon.png",
-        },
-
+        strategies: sw ? 'injectManifest' : 'generateSW',
+        srcDir: sw ? 'service-worker' : undefined,
+        filename: sw ? 'sw.ts' : undefined,
+        registerType: 'autoUpdate',
         manifest: {
-            name: "ThermoTrack",
-            short_name: "ThermoTrack",
-            description: "ThermoTrack is a thermal contraception tracking PWA",
-            theme_color: "#e9ecef",
-            lang: "fr",
-            background_color: "#e9ecef",
-            scope: "/",
-            icons: [
-                {
-                    src: "/favicon.png",
-                    sizes: "512x512",
-                    type: "image/png",
-                },
-            ],
+          name: 'ThermoTrack',
+          short_name: 'ThermoTrack',
+          theme_color: '#e9ecef',
+          icons: [
+            {
+              src: 'favicon.png',
+              sizes: '192x192',
+              type: 'image/png',
+            },
+            {
+              src: 'favicon.png',
+              sizes: '512x512',
+              type: 'image/png',
+            },
+            {
+              src: 'favicon.png',
+              sizes: '512x512',
+              type: 'image/png',
+              purpose: 'any maskable',
+            },
+          ],
+        },
+        workbox: {
+          globPatterns: ['**/*.{js,css,html,png,svg,ico}'],
+        },
+        injectManifest: {
+          globPatterns: ['**/*.{js,css,html,png,svg,ico}'],
+        },
+        client: {
+          installPrompt: true,
         },
     },
 

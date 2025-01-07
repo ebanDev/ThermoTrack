@@ -15,6 +15,7 @@
     "@nuxtjs/google-fonts": "^3.2.0",
     "@pinia-plugin-persistedstate/nuxt": "^1.2.1",
     "@pinia/nuxt": "^0.5.5",
+    "@vite-pwa/nuxt": "0.10.6",
     "add": "^2.0.6",
     "chart.js": "^4.4.6",
     "konsta": "^4.0.1",
@@ -26,7 +27,6 @@
     "vue-chartjs": "^5.3.2"
   },
   "devDependencies": {
-    "@nuxtjs/pwa": "^3.3.5",
     "autoprefixer": "^10.4.20",
     "postcss": "^8.4.49",
     "sass": "^1.80.6",
