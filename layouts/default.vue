@@ -3,9 +3,9 @@
     <top-bar />
     <main class="mb-32">
       <slot />
+      <pwa-notifications />
     </main>
     <tab-bar />
-    <pwa-notifications />
   </k-page>
 </template>
 
