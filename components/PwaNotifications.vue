@@ -14,7 +14,7 @@
     </k-dialog>
 
     <!-- Offline ready notification -->
-    <k-toast position="bottom" :opened="$pwa?.offlineReady" @toastclose="$pwa?.cancelPrompt">
+    <k-toast :opened="$pwa?.offlineReady" @toastclose="$pwa?.cancelPrompt">
       <div class="shrink">Application prête à fonctionner hors ligne</div>
       <template #button>
         <k-button clear inline @click="$pwa?.cancelPrompt">
@@ -39,5 +39,6 @@
 </template>
 
 <script setup>
-import { kToast, kButton, kDialog, kDialogButton } from 'konsta/vue';
+import { getCurrentInstance } from 'vue'
+import { kToast, kButton, kDialog, kDialogButton } from 'konsta/vue'
 </script>

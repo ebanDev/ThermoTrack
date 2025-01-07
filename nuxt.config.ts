@@ -17,42 +17,38 @@ export default defineNuxtConfig({
     css: ["~/static/css/base.css", "~/static/css/tailwind.css"],
 
     pwa: {
-        strategies: sw ? 'injectManifest' : 'generateSW',
-        srcDir: sw ? 'service-worker' : undefined,
-        filename: sw ? 'sw.ts' : undefined,
-        registerType: 'autoUpdate',
-        manifest: {
-          name: 'ThermoTrack',
-          short_name: 'ThermoTrack',
-          theme_color: '#e9ecef',
-          icons: [
-            {
-              src: 'favicon.png',
-              sizes: '192x192',
-              type: 'image/png',
-            },
-            {
-              src: 'favicon.png',
-              sizes: '512x512',
-              type: 'image/png',
-            },
-            {
-              src: 'favicon.png',
-              sizes: '512x512',
-              type: 'image/png',
-              purpose: 'any maskable',
-            },
-          ],
-        },
-        workbox: {
-          globPatterns: ['**/*.{js,css,html,png,svg,ico}'],
-        },
-        injectManifest: {
-          globPatterns: ['**/*.{js,css,html,png,svg,ico}'],
-        },
-        client: {
-          installPrompt: true,
-        },
+      registerType: 'autoUpdate',
+      manifest: {
+        name: "ThermoTrack",
+        short_name: "ThermoTrack",
+        description: "ThermoTrack is a thermal contraception tracking PWA",
+        theme_color: "#e9ecef",
+        background_color: "#f3f3f3",
+        lang: "fr",
+        display: "standalone",
+        start_url: "/",
+        icons: [
+          {
+            src: "/favicon.png",
+            sizes: "512x512",
+            type: "image/png",
+          },
+        ],
+      },
+      workbox: {
+        cleanupOutdatedCaches: true,
+        navigateFallback: '/en-US',
+        globPatterns: ['**/*.{js,css,html,png,svg,ico}'],
+        globIgnores: ['storybook/**.*', 'storybook/**/**.*'],
+      },
+      client: {
+        installPrompt: true,
+        periodicSyncForUpdates: 3600,
+      },
+      devOptions: {
+        enabled: false,
+        type: 'module',
+      },  
     },
 
     app: {
@@ -77,7 +73,6 @@ export default defineNuxtConfig({
             ],
             link: [
                 { rel: "apple-touch-icon", href: "/favicon.png" },
-                { rel: "manifest", href: "/manifest.json" },
             ]
         },
 

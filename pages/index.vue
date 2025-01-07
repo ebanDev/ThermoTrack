@@ -2,7 +2,7 @@
 import { useSession } from '~/composables/useSession';
 import { useTime } from '~/composables/useTime';
 import { useSessionGroups } from '~/composables/useSessionGroups';
-import { kButton, kCard, kList, kListItem } from 'konsta/vue';
+import { kButton, kCard } from 'konsta/vue';
 
 const userPrefsStore = useUserPrefsStore();
 const { wearingSessions, wearingGoal, dayStartAt } = storeToRefs(userPrefsStore);
@@ -61,16 +61,16 @@ definePageMeta({
         <Icon name="i-tabler-play" class="mr-2" />
         Démarrer
       </k-button>
-      <k-button v-else @click="stopSession" class="w-full text-base">
-        <Icon name="i-tabler-player-pause" class="mr-2" />
+      <k-button v-else @click="stopSession" class="w-full !text-base">
+        <Icon name="i-tabler-player-pause" class="mr-2 text-base" />
         Arrêter
       </k-button>
-      <k-button v-if="!isWearing" @click="startSessionAt" class="w-full text-base">
-        <Icon name="i-tabler-rotate-clockwise" class="mr-2" />
+      <k-button v-if="!isWearing" @click="startSessionAt" class="w-full !text-base">
+        <Icon name="i-tabler-rotate-clockwise" class="mr-2 text-base" />
         Démarrer à...
       </k-button>
-      <k-button v-else @click="stopSessionAt" class="w-full text-base">
-        <Icon name="i-tabler-rotate" class="mr-2" />
+      <k-button v-else @click="stopSessionAt" class="w-full !text-base">
+        <Icon name="i-tabler-rotate" class="mr-2 text-base" />
         Arrêter à...
       </k-button>
     </div>
@@ -97,7 +97,7 @@ definePageMeta({
             <div>
               <h3 class="font-bold text-base mb-2">{{ group.date }}</h3>
               <div class="flex flex-col gap-1">
-                <k-block v-for="session in [...group.sessions].sort((a, b) => a.start.getTime() - b.start.getTime())"
+                <div v-for="session in [...group.sessions].sort((a, b) => a.start.getTime() - b.start.getTime())"
                   :key="session.start" class="cursor-pointer"
                   @click="currentSessionGroup = group; showSessionDialog = true">
                   {{ new Date(session.start).toLocaleTimeString('fr-FR', {
@@ -108,10 +108,10 @@ definePageMeta({
                   }) : 'En cours' }}
                   ({{ session.end ? (((session.end.getTime() < session.start.getTime() ? session.end.getTime() +
                     86400000 : session.end.getTime()) - session.start.getTime()) / 3600000).toFixed(1) : ((new
-                      Date().getTime() - session.start.getTime()) / 3600000).toFixed(1) }}h) </k-block>
-                    <k-block class="font-bold">
+                      Date().getTime() - session.start.getTime()) / 3600000).toFixed(1) }}h) </div>
+                    <div class="font-bold">
                       Total: {{ (wearingGoal * (group.total / 100)).toFixed(1) }}h
-                    </k-block>
+                    </div>
               </div>
             </div>
             <progress-circle :progress="group.total" :size="50" :strokeWidth="8" />
