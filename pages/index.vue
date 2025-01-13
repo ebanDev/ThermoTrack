@@ -30,6 +30,7 @@ let timer: NodeJS.Timeout;
 
 const showScoreDialog = ref(false);
 const showSessionDialog = ref(false);
+const currentSessionGroup = ref(null);
 const historicalScores = computed(() => getHistoricalScores());
 const historicalProgress = computed(() => getHistoricalProgress());
 
@@ -48,12 +49,71 @@ onMounted(() => {
 definePageMeta({
   title: 'Accueil',
 });
+
+const touchStart = ref(null);
+
+const handleTouchStart = (e) => {
+  touchStart.value = e.touches[0].clientX;
+};
+
+const handleTouchMove = (e) => {
+  if (!touchStart.value) return;
+  
+  const touchEnd = e.touches[0].clientX;
+  const diff = touchStart.value - touchEnd;
+  
+  if (Math.abs(diff) > 50) {
+    userPrefsStore.preferredVisualization = diff > 0 ? 'time' : 'progress';
+    touchStart.value = null;
+  }
+};
+
+const handleTouchEnd = () => {
+  touchStart.value = null;
+};
+
+const todaySessions = computed(() => {
+  const today = getSessionDay(new Date());
+  const todayGroup = groupedSessions.value.find(group => group.date === today);
+  return todayGroup?.sessions || [];
+});
 </script>
 
 <template>
   <main class="flex flex-col pt-8 h-full gap-6">
-    <div class="relative w-[200px] h-[200px] mx-auto">
-      <progress-circle :progress="progress" :text="totalTime" :subtext="estEndTime" :size="200" :strokeWidth="15" />
+    <div 
+      class="relative w-[200px] h-[200px] mx-auto"
+      @touchstart="handleTouchStart"
+      @touchmove="handleTouchMove"
+      @touchend="handleTouchEnd"
+    >
+      <transition name="slide" mode="out-in">
+        <progress-circle
+          v-if="userPrefsStore.preferredVisualization === 'progress'"
+          :key="'progress'"
+          :size="200"
+          :stroke-width="13"
+          :progress="progress"
+          :text="totalTime"
+          :subtext="estEndTime"
+        />
+        <time-circle
+          v-else
+          :key="'time'"
+          :size="200"
+          :sessions="todaySessions"
+          :day-start="userPrefsStore.dayStartAt"
+          :wearing-goal="userPrefsStore.wearingGoal"
+          :stroke-width="13"
+        >
+          <span class="text-[1.75rem] font-extrabold text-md-light-on-surface dark:text-md-dark-on-surface">
+            {{ totalTime }}
+          </span>
+          <span class="text-[1.2rem] font-semibold text-md-light-on-surface-variant dark:text-md-dark-on-surface-variant whitespace-nowrap">
+            {{ estEndTime }}
+          </span>
+        </time-circle>
+      </transition>
     </div>
 
     <div class="flex gap-4 justify-center w-full px-4">
@@ -92,14 +152,13 @@ definePageMeta({
     <div class="px-4">
       <h2 class="text-xl font-bold mb-3">Historique</h2>
       <div class="flex flex-col">
-        <k-card v-for="group in groupedSessions" :key="group.date" class="mx-0 my-2">
+        <k-card v-for="group in groupedSessions" :key="group.date" class="mx-0 my-2" @click="currentSessionGroup = group; showSessionDialog = true">
           <div class="flex gap-2 items-start justify-between">
             <div>
               <h3 class="font-bold text-base mb-2">{{ group.date }}</h3>
               <div class="flex flex-col gap-1">
                 <div v-for="session in [...group.sessions].sort((a, b) => a.start.getTime() - b.start.getTime())"
-                  :key="session.start" class="cursor-pointer"
-                  @click="currentSessionGroup = group; showSessionDialog = true">
+                  :key="session.start" class="cursor-pointer">
                   {{ new Date(session.start).toLocaleTimeString('fr-FR', {
                     hour: '2-digit', minute: '2-digit', hour12: false
                   }) }} -
@@ -120,9 +179,24 @@ definePageMeta({
       </div>
     </div>
 
-    <dialogs-edit-sessions v-if="showSessionDialog" :sessionGroup="currentSessionGroup"
+    <dialogs-edit-sessions :opened="showSessionDialog" :sessionGroup="currentSessionGroup"
       @close="showSessionDialog = false" />
-    <dialogs-wearing-score v-if="showScoreDialog" :scores="historicalScores" :progress="historicalProgress"
+    <dialogs-wearing-score :opened="showScoreDialog" :scores="historicalScores" :progress="historicalProgress"
       @close="showScoreDialog = false" />
   </main>
 </template>
+
+<style scoped>
+.slide-enter-active,
+.slide-leave-active {
+  transition: transform 0.3s ease;
+}
+
+.slide-enter-from {
+  transform: translateX(100%);
+}
+
+.slide-leave-to {
+  transform: translateX(-100%);
+}
+</style>
