@@ -30,9 +30,19 @@ let timer: NodeJS.Timeout;
 
 const showScoreDialog = ref(false);
 const showSessionDialog = ref(false);
+const showStartAtDialog = ref(false);
+const showStopAtDialog = ref(false);
 const currentSessionGroup = ref(null);
 const historicalScores = computed(() => getHistoricalScores());
 const historicalProgress = computed(() => getHistoricalProgress());
+
+const handleStartAt = (date: Date) => {
+  startSessionAt(date);
+};
+
+const handleStopAt = (date: Date) => {
+  stopSessionAt(date);
+};
 
 onMounted(() => {
   const unfinishedSession = wearingSessions.value.find(session => !session.end);
@@ -125,11 +135,11 @@ const todaySessions = computed(() => {
         <Icon name="i-tabler-player-pause" class="mr-2 text-base" />
         Arrêter
       </k-button>
-      <k-button v-if="!isWearing" @click="startSessionAt" class="w-full !text-base">
+      <k-button v-if="!isWearing" @click="showStartAtDialog = true" class="w-full !text-base">
         <Icon name="i-tabler-rotate-clockwise" class="mr-2 text-base" />
         Démarrer à...
       </k-button>
-      <k-button v-else @click="stopSessionAt" class="w-full !text-base">
+      <k-button v-else @click="showStopAtDialog = true" class="w-full !text-base">
         <Icon name="i-tabler-rotate" class="mr-2 text-base" />
         Arrêter à...
       </k-button>
@@ -183,6 +193,18 @@ const todaySessions = computed(() => {
       @close="showSessionDialog = false" />
     <dialogs-wearing-score :opened="showScoreDialog" :scores="historicalScores" :progress="historicalProgress"
       @close="showScoreDialog = false" />
+    <dialogs-start-session-at 
+      :opened="showStartAtDialog"
+      :day-start-at="dayStartAt"
+      @close="showStartAtDialog = false"
+      @confirm="handleStartAt"
+    />
+    <dialogs-stop-session-at
+      :opened="showStopAtDialog"
+      :day-start-at="dayStartAt"
+      @close="showStopAtDialog = false"
+      @confirm="handleStopAt"
+    />
   </main>
 </template>
 

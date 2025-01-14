@@ -2,7 +2,7 @@ import { useTime } from './useTime';
 import { useSessionGroups } from './useSessionGroups';
 
 export function useSession(wearingSessions, wearingGoal, dayStartAt) {
-  const { getSessionDay, setToStartOfDay } = useTime(dayStartAt);
+  const { getSessionDay, setToStartOfDay, getStartOfDay } = useTime(dayStartAt);
   const { getTotalTimeWornToday } = useSessionGroups(
     wearingSessions,
     wearingGoal,
@@ -39,7 +39,8 @@ export function useSession(wearingSessions, wearingGoal, dayStartAt) {
     }
     const now = new Date();
     const d = new Date(now.getFullYear(), now.getMonth(), now.getDate(), h, m);
-    if (h < 5 || d > now) d.setDate(d.getDate() - 1);
+    const startOfDay = getStartOfDay(now);
+    if (d < startOfDay) d.setDate(d.getDate() + 1);
     return d;
   };
 

@@ -8,7 +8,7 @@ export function useSessionGroups(wearingSessions, wearingGoal, dayStartAt, getSe
     const addSession = (date, start, end) => {
       let group = grouped.find(g => g.date === date);
       if (!group) {
-        group = { date, sessions: [] };
+        group = { date, sessions: [], isPartialDay: false };
         grouped.push(group);
       }
       group.sessions.push({ start, end });
@@ -17,30 +17,91 @@ export function useSessionGroups(wearingSessions, wearingGoal, dayStartAt, getSe
     wearingSessions.value.forEach(session => {
       const start = new Date(session.start);
       const end = session.end ? new Date(session.end) : null;
+      
       if (end) {
-        let currentStart = new Date(start), currentEnd = new Date(end);
-        if (currentEnd < currentStart) currentEnd = new Date(currentEnd.getTime() + 86400000);
-        while (currentStart < currentEnd) {
-          const dayStart = getStartOfDay(currentStart);
-          const nextDay = new Date(dayStart.getTime() + 86400000);
-          const s = new Date(Math.max(currentStart.getTime(), dayStart.getTime()));
-          const e = new Date(Math.min(currentEnd.getTime(), nextDay.getTime()));
-          addSession(getSessionDay(s), s, e);
-          currentStart = nextDay;
+        const startDay = getStartOfDay(start);
+        const endDay = getStartOfDay(end);
+        
+        if (startDay.getTime() === endDay.getTime()) {
+          // Same day session
+          addSession(getSessionDay(start), start, end);
+        } else {
+          // Cross-day session, split into multiple days
+          let currentStart = new Date(start);
+          let currentEnd = new Date(end);
+          let isFirstDay = true;
+          
+          while (currentStart < currentEnd) {
+            const dayStart = getStartOfDay(currentStart);
+            const nextDayStart = new Date(dayStart.getTime() + 86400000);
+            const s = new Date(Math.max(currentStart.getTime(), dayStart.getTime()));
+            const e = new Date(Math.min(currentEnd.getTime(), nextDayStart.getTime()));
+            
+            const date = getSessionDay(s);
+            let group = grouped.find(g => g.date === date);
+            if (!group) {
+              group = { date, sessions: [], isPartialDay: !isFirstDay };
+              grouped.push(group);
+            } else if (!isFirstDay) {
+              group.isPartialDay = true;
+            }
+            group.sessions.push({ start: s, end: e });
+            
+            currentStart = nextDayStart;
+            isFirstDay = false;
+          }
         }
       } else {
-        addSession(getSessionDay(start), start, null);
+        // Ongoing session
+        const start = new Date(session.start);
+        const now = new Date();
+        const startDay = getStartOfDay(start);
+        const endDay = getStartOfDay(now);
+        
+        if (startDay.getTime() === endDay.getTime()) {
+          // Same day ongoing session
+          addSession(getSessionDay(start), start, null);
+        } else {
+          // Cross-day ongoing session, split into multiple days
+          let currentStart = new Date(start);
+          let isFirstDay = true;
+          
+          while (currentStart <= now) {
+            const dayStart = getStartOfDay(currentStart);
+            const nextDayStart = new Date(dayStart.getTime() + 86400000);
+            const s = new Date(Math.max(currentStart.getTime(), dayStart.getTime()));
+            const e = new Date(Math.min(now.getTime(), nextDayStart.getTime()));
+            
+            const date = getSessionDay(s);
+            let group = grouped.find(g => g.date === date);
+            if (!group) {
+              group = { date, sessions: [], isPartialDay: !isFirstDay };
+              grouped.push(group);
+            } else if (!isFirstDay) {
+              group.isPartialDay = true;
+            }
+            
+            if (getStartOfDay(e).getTime() === getStartOfDay(now).getTime()) {
+              // Last day of the ongoing session
+              group.sessions.push({ start: s, end: null });
+            } else {
+              group.sessions.push({ start: s, end: e });
+            }
+            
+            currentStart = nextDayStart;
+            isFirstDay = false;
+          }
+        }
       }
     });
 
+    // Compute totals for each group
     grouped.forEach(group => {
       const baseDay = getStartOfDay(new Date(group.sessions[0].start));
-      const endOfDay = new Date(baseDay.getTime());
-      endOfDay.setHours(29, 0, 0, 0);
+      const endOfDay = new Date(baseDay.getTime() + 86400000);
       group.total = group.sessions.reduce((acc, session) => {
         const sessionStart = new Date(session.start);
         const sessionEnd = session.end ? new Date(session.end) : new Date();
-        if (sessionEnd < sessionStart) sessionEnd.setTime(sessionEnd.getTime() + 86400000);
         const effectiveStart = new Date(Math.max(sessionStart.getTime(), baseDay.getTime()));
         const effectiveEnd = new Date(Math.min(sessionEnd.getTime(), endOfDay.getTime()));
         const dur = (effectiveEnd - effectiveStart) / 3600000;
