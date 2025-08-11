@@ -44,6 +44,14 @@
         r="2"
         class="fill-md-light-on-surface dark:fill-md-dark-on-surface"
       />
+      <!-- Deadline indicator (last moment to wear) -->
+      <circle
+        v-if="remainingTime > 0 && deadlinePosition"
+        :cx="deadlinePosition.x"
+        :cy="deadlinePosition.y"
+        r="3"
+        class="fill-red-500 animate-pulse"
+      />
     </svg>
     <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center flex flex-col items-center">
       <slot></slot>
@@ -242,6 +250,32 @@ const currentTimePosition = computed(() => {
   
   // Get position on the circle
   return polarToCartesian(radius.value, radius.value, normalizedRadius.value, currentAngle);
+});
+
+const deadlinePosition = computed(() => {
+  // Only show deadline if there's remaining time
+  if (remainingTime.value <= 0) return null;
+  
+  const now = currentTime.value;
+  const [startHour, startMin] = props.dayStart.split(':').map(Number);
+  
+  // Calculate end of wearing day (next day's dayStart)
+  const endOfDay = new Date(now);
+  endOfDay.setDate(endOfDay.getDate() + 1);
+  endOfDay.setHours(startHour, startMin, 0, 0);
+  
+  // Calculate deadline time (end of day - remaining time needed)
+  const deadlineTime = new Date(endOfDay.getTime() - remainingTime.value);
+  
+  // Calculate deadline angle in seconds (from day start)
+  const deadlineSeconds = (deadlineTime.getHours() * 3600 + deadlineTime.getMinutes() * 60 + deadlineTime.getSeconds()) - 
+                         (startHour * 3600 + startMin * 60);
+  
+  // Convert to angle (0-360)
+  const deadlineAngle = (((deadlineSeconds + 24 * 3600) % (24 * 3600)) / (24 * 3600)) * 360;
+  
+  // Get position on the circle
+  return polarToCartesian(radius.value, radius.value, normalizedRadius.value, deadlineAngle);
 });
 
 function polarToCartesian(centerX, centerY, radius, angleInDegrees) {

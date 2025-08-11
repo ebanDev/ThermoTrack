@@ -18,6 +18,39 @@ export default defineNuxtConfig({
 
     pwa: {
       registerType: 'autoUpdate',
+      // Align Workbox options with journal PWA for robust offline support
+      workbox: {
+        // Precache built assets and common static types
+        globPatterns: ['**/*.{js,css,html,png,svg,ico,woff,woff2,ttf}'],
+        cleanupOutdatedCaches: true,
+        // Cache external resources required for first paint
+        runtimeCaching: [
+          {
+            // Google Fonts stylesheets
+            urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'google-fonts-stylesheets',
+              expiration: {
+                maxEntries: 10,
+                maxAgeSeconds: 60 * 60 * 24 * 365, // 1 year
+              },
+            },
+          },
+          {
+            // Google Fonts files
+            urlPattern: /^https:\/\/fonts\.gstatic\.com\/.*/i,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'google-fonts-webfonts',
+              expiration: {
+                maxEntries: 20,
+                maxAgeSeconds: 60 * 60 * 24 * 365, // 1 year
+              },
+            },
+          },
+        ],
+      },
       manifest: {
         name: "ThermoTrack",
         short_name: "ThermoTrack",
@@ -35,10 +68,6 @@ export default defineNuxtConfig({
             type: "image/png",
           },
         ],
-      },
-      workbox: {
-        cleanupOutdatedCaches: true,
-        globPatterns: ["**/*"],
       },
       client: {
         installPrompt: true,
